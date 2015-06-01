@@ -8476,7 +8476,8 @@ static int tomtom_codec_fll_enable(struct snd_soc_codec *codec,
 				    0x1F, 0x15);
 		snd_soc_update_bits(codec, TOMTOM_A_FLL_KDCO_TUNE,
 				    0x07, 0x06);
-		snd_soc_write(codec, TOMTOM_A_FLL_LOCK_THRESH, 0xD1);
+		snd_soc_write(codec, TOMTOM_A_FLL_LOCK_THRESH,
+			      0xD1);
 		snd_soc_write(codec, TOMTOM_A_FLL_LOCK_DET_COUNT,
 			      0x40);
 		break;
@@ -8485,7 +8486,8 @@ static int tomtom_codec_fll_enable(struct snd_soc_codec *codec,
 				    0x1F, 0x11);
 		snd_soc_update_bits(codec, TOMTOM_A_FLL_KDCO_TUNE,
 				    0x07, 0x05);
-		snd_soc_write(codec, TOMTOM_A_FLL_LOCK_THRESH, 0xB1);
+		snd_soc_write(codec, TOMTOM_A_FLL_LOCK_THRESH,
+			      0xB1);
 		snd_soc_write(codec, TOMTOM_A_FLL_LOCK_DET_COUNT,
 			      0x40);
 		break;
