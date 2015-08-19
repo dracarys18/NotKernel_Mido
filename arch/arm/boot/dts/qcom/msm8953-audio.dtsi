@@ -253,11 +253,11 @@
 
 	cdc-vdd-tx-h-supply = <&eldo2_8953>;
 	qcom,cdc-vdd-tx-h-voltage = <1800000 1800000>;
-	qcom,cdc-vdd-tx-h-current = <25000>;
+	qcom,cdc-vdd-tx-h-current = <45000>;
 
 	cdc-vdd-rx-h-supply = <&eldo2_8953>;
 	qcom,cdc-vdd-rx-h-voltage = <1800000 1800000>;
-	qcom,cdc-vdd-rx-h-current = <25000>;
+	qcom,cdc-vdd-rx-h-current = <45000>;
 
 	cdc-vdd-px-supply = <&eldo2_8953>;
 	qcom,cdc-vdd-px-voltage = <1800000 1800000>;
