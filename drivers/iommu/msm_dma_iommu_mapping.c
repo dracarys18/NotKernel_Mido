@@ -133,6 +133,22 @@ void msm_dma_unmap_sg(struct device *dev, struct scatterlist *sgl, int nents,
 	mutex_unlock(&data->lock);
 }
 
+int msm_dma_unmap_all_for_dev(struct device *dev)
+{
+	struct msm_iommu_meta *meta, *tmp_meta;
+	struct msm_iommu_map *map;
+
+	down_write(&unmap_all_rwsem);
+	list_for_each_entry_safe(meta, tmp_meta, &meta_list, lnode) {
+		map = msm_iommu_map_lookup(meta, dev);
+		if (map)
+			msm_iommu_map_free(meta, map);
+	}
+	up_write(&unmap_all_rwsem);
+
+	return 0;
+}
+
 void msm_dma_buf_freed(struct msm_iommu_data *data)
 {
 	struct msm_iommu_map *map, *tmp_map;
