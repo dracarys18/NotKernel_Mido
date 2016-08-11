@@ -93,6 +93,21 @@ void msm_dma_unmap_sg(struct device *dev, struct scatterlist *sg, int nents,
 	mutex_unlock(&dev->iommu_map_lock);
 }
 
+void msm_dma_unmap_all_for_dev(struct device *dev)
+{
+	struct msm_iommu_map *map, *tmp;
+
+	mutex_lock(&dev->iommu_map_lock);
+	list_for_each_entry_safe(map, tmp, &dev->iommu_map_list, dev_node) {
+		struct msm_iommu_data *data = map->data;
+
+		mutex_lock(&data->lock);
+		msm_iommu_map_free(map);
+		mutex_unlock(&data->lock);
+	}
+	mutex_unlock(&dev->iommu_map_lock);
+}
+
 void msm_dma_buf_freed(struct msm_iommu_data *data)
 {
 	struct msm_iommu_map *map, *tmp;

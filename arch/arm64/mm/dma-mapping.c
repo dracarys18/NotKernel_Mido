@@ -33,6 +33,7 @@
 #include <asm/dma-iommu.h>
 #include <linux/io.h>
 #include <linux/dma-mapping-fast.h>
+#include <linux/msm_dma_iommu_mapping.h>
 
 #include "mm.h"
 
@@ -1631,6 +1632,8 @@ void arm_iommu_detach_device(struct device *dev)
 		fast_smmu_detach_device(dev, mapping);
 		return;
 	}
+
+	msm_dma_unmap_all_for_dev(dev);
 
 	iommu_detach_device(mapping->domain, dev);
 	kref_put(&mapping->kref, release_iommu_mapping);
