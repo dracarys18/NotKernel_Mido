@@ -1834,7 +1834,7 @@ static void qpnp_hap_td_enable(struct timed_output_dev *dev, int value)
 	hap->td_value = value;
 	spin_unlock(&hap->td_lock);
 
-	schedule_work(&hap->td_work);
+	queue_work(hap->wq, &hap->td_work);
 }
 
 /* play pwm bytes */
