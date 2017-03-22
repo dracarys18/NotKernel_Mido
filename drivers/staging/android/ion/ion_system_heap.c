@@ -99,7 +99,11 @@ static struct page *alloc_buffer_page(struct ion_system_heap *heap,
 		gfp_t gfp_mask = low_order_gfp_flags;
 		if (order)
 			gfp_mask = high_order_gfp_flags;
+
 		page = alloc_pages(gfp_mask, order);
+		if (page)
+			ion_pages_sync_for_device(dev, page, PAGE_SIZE << order,
+						  DMA_BIDIRECTIONAL);
 	}
 	if (!page)
 		return 0;
