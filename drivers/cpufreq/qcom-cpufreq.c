@@ -64,7 +64,7 @@ static int set_cpu_freq(struct cpufreq_policy *policy, unsigned int new_freq,
 {
 	int ret = 0;
 	struct cpufreq_freqs freqs;
-	unsigned long rate;
+	unsigned long rate = 0L;
 
 	freqs.old = policy->cur;
 	freqs.new = new_freq;
@@ -92,7 +92,7 @@ static int msm_cpufreq_target(struct cpufreq_policy *policy,
 				unsigned int relation)
 {
 	int ret = 0;
-	int index;
+	int index = 0;
 	struct cpufreq_frequency_table *table;
 	struct clk *c = cpu_clk[policy->cpu];
 	s64 delta_us;
@@ -156,12 +156,12 @@ static unsigned int msm_cpufreq_get_freq(unsigned int cpu)
 
 static int msm_cpufreq_init(struct cpufreq_policy *policy)
 {
-	int cur_freq;
-	int index;
+	int cur_freq = 0;
+	int index = 0;
 	int ret = 0;
 	struct cpufreq_frequency_table *table =
 			per_cpu(freq_table, policy->cpu);
-	int cpu;
+	int cpu = 0;
 
 	/*
 	 * In some SoC, some cores are clocked by same source, and their
@@ -209,7 +209,7 @@ static int msm_cpufreq_cpu_callback(struct notifier_block *nfb,
 		unsigned long action, void *hcpu)
 {
 	unsigned int cpu = (unsigned long)hcpu;
-	int rc;
+	int rc = 0;
 
 	/* Fail hotplug until this driver can get CPU clocks */
 	if (!hotplug_ready)
@@ -306,7 +306,7 @@ static void cpu_pm_unboost_worker(struct work_struct *work)
 
 static int msm_cpufreq_suspend(void)
 {
-	int cpu;
+	int cpu = 0;
 
 	suspended_once = true;
 	cancel_delayed_work_sync(&pm_unboost_work);
@@ -322,7 +322,7 @@ static int msm_cpufreq_suspend(void)
 
 static int msm_cpufreq_resume(void)
 {
-	int cpu, ret;
+	int cpu = 0, ret = 0;
 	struct cpufreq_policy policy;
 
 	for_each_possible_cpu(cpu) {
@@ -392,7 +392,7 @@ static struct cpufreq_driver msm_cpufreq_driver = {
 static struct cpufreq_frequency_table *cpufreq_parse_dt(struct device *dev,
 						char *tbl_name, int cpu)
 {
-	int ret, nf, i;
+	int ret = 0, nf = 0, i = 0;
 	u32 *data;
 	struct cpufreq_frequency_table *ftbl;
 
@@ -460,7 +460,7 @@ static int __init msm_cpufreq_probe(struct platform_device *pdev)
 	char clk_name[] = "cpu??_clk";
 	char tbl_name[] = "qcom,cpufreq-table-??";
 	struct clk *c;
-	int cpu;
+	int cpu = 0;
 	struct cpufreq_frequency_table *ftbl;
 
 	l2_clk = devm_clk_get(dev, "l2_clk");
@@ -544,7 +544,7 @@ static struct platform_driver msm_cpufreq_plat_driver = {
 
 static int __init msm_cpufreq_register(void)
 {
-	int cpu, rc;
+	int cpu = 0, rc = 0;
 
 	for_each_possible_cpu(cpu) {
 		mutex_init(&(per_cpu(suspend_data, cpu).suspend_mutex));
