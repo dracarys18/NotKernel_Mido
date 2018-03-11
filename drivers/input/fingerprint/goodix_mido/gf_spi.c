@@ -568,13 +568,15 @@ static const struct file_operations gf_fops = {
 static void fb_state_worker(struct work_struct *work)
 {
 	struct gf_dev *gf_dev = container_of(work, typeof(*gf_dev), fb_work);
+
 	if (!gf_dev->device_available)
 		return;
- #if defined(GF_NETLINK_ENABLE)
+
+#if defined(GF_NETLINK_ENABLE)
 	{
 		char temp = gf_dev->fb_black ?
 			GF_NET_EVENT_FB_BLACK : GF_NET_EVENT_FB_UNBLACK;
-		sendnlmsg(&temp);
+
 	}
 #elif defined(GF_FASYNC)
 	if (gf_dev->async)
@@ -589,16 +591,21 @@ static int goodix_fb_state_chg_callback(struct notifier_block *nb,
 	struct fb_event *evdata = data;
 	int *blank = evdata->data;
 
+#if defined(GF_NETLINK_ENABLE)
+		char temp = 0;
+#endif
+
 	if (val != FB_EARLY_EVENT_BLANK)
 		return 0;
-	switch (*blank) {
-		case FB_BLANK_POWERDOWN:
-			gf_dev->fb_black = 1;
-			schedule_work(&gf_dev->fb_work);
+	
+        switch (*blank) {
+	case FB_BLANK_POWERDOWN:
+		gf_dev->fb_black = 1;
+		schedule_work(&gf_dev->fb_work);
 		break;
-		case FB_BLANK_UNBLANK:
-			gf_dev->fb_black = 0;
-			schedule_work(&gf_dev->fb_work);
+	case FB_BLANK_UNBLANK:
+		gf_dev->fb_black = 0;
+		schedule_work(&gf_dev->fb_work);
 		break;
 	}
 	return NOTIFY_OK;
@@ -700,7 +707,7 @@ static int gf_probe(struct platform_device *pdev)
 		spi_clock_set(gf_dev, 4.8*1000*1000);
 #endif
 
-		INIT_WORK(&gf_dev->fb_work, fb_state_worker);
+                INIT_WORK(&gf_dev->fb_work, fb_state_worker);
 		gf_dev->notifier = goodix_noti_block;
 		fb_register_client(&gf_dev->notifier);
 		gf_reg_key_kernel(gf_dev);
