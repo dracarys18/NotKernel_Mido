@@ -24,7 +24,7 @@
  *
  *
  * Copyright (c) 2015 Fingerprint Cards AB <tech@fingerprints.com>
- * Copyright (C) 2017 XiaoMi, Inc.
+ * Copyright (C) 2018 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License Version 2
@@ -55,7 +55,7 @@
 #define NUM_PARAMS_REG_ENABLE_SET 2
 
 static const char * const pctl_names[] = {
-
+	"fpc1020_spi_active",
 	"fpc1020_reset_reset",
 	"fpc1020_reset_active",
 	"fpc1020_irq_active",
@@ -398,7 +398,7 @@ static ssize_t compatible_all_set(struct device *dev,
 		if (rc) {
 			dev_err(dev, "could not request irq %d\n",
 				gpio_to_irq(fpc1020->irq_gpio));
-		goto exit;
+			goto exit;
 		}
 		dev_dbg(dev, "requested irq %d\n", gpio_to_irq(fpc1020->irq_gpio));
 
@@ -409,10 +409,10 @@ static ssize_t compatible_all_set(struct device *dev,
 			dev_info(dev, "Enabling hardware\n");
 			(void)device_prepare(fpc1020, true);
 #ifdef LINUX_CONTROL_SPI_CLK
-		(void)set_clks(fpc1020, false);
+			(void)set_clks(fpc1020, false);
 #endif
-	}
-	} else if (!strncmp(buf, "disable", strlen("disable")) && fpc1020->compatible_enabled != 0) {
+                }
+	} else if (!memcmp(buf, "disable", sizeof("disable")) && fpc1020->compatible_enabled != 0) {
 		if (gpio_is_valid(fpc1020->irq_gpio)) {
 			devm_gpio_free(dev, fpc1020->irq_gpio);
 			pr_info("remove irq_gpio success\n");
@@ -423,7 +423,8 @@ static ssize_t compatible_all_set(struct device *dev,
 		}
 		devm_free_irq(dev, gpio_to_irq(fpc1020->irq_gpio), fpc1020);
 		fpc1020->compatible_enabled = 0;
-	}
+	} else
+		goto exit;
 	hw_reset(fpc1020);
 	return count;
 exit:
@@ -534,7 +535,8 @@ static int fpc1020_probe(struct platform_device *pdev)
 	}
 #endif
 
-	fpc1020->wakeup_enabled = false;
+	fpc1020->wakeup_enabled = true;
+
 #ifdef LINUX_CONTROL_SPI_CLK
 	fpc1020->clocks_enabled = false;
 	fpc1020->clocks_suspended = false;
