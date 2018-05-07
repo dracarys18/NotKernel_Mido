@@ -4979,6 +4979,18 @@ static int fg_power_set_property(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_BATTERY_INFO_ID:
 		chip->batt_info_id = val->intval;
 		break;
+	case POWER_SUPPLY_PROP_CHARGE_FULL:
+		if (chip->learning_data.active) {
+			pr_warn("Capacity learning active!\n");
+			return 0;
+		}
+		if (val->intval <= 0 || val->intval > chip->nom_cap_uah) {
+			pr_err("charge_full is out of bounds\n");
+			return -EINVAL;
+		}
+		chip->learning_data.learned_cc_uah = val->intval;
+		fg_cap_learning_save_data(chip);
+		break;
 	default:
 		return -EINVAL;
 	};
@@ -4995,6 +5007,7 @@ static int fg_property_is_writeable(struct power_supply *psy,
 #ifdef CONFIG_QPNP_LEGACY_CYCLE_COUNT
 	case POWER_SUPPLY_PROP_CYCLE_COUNT_ID:
 #endif
+	case POWER_SUPPLY_PROP_CHARGE_FULL:
 	case POWER_SUPPLY_PROP_BATTERY_INFO:
 	case POWER_SUPPLY_PROP_BATTERY_INFO_ID:
 		return 1;
