@@ -4492,6 +4492,9 @@ int dsi_panel_device_register(struct platform_device *ctrl_pdev,
 	init_completion(&ctrl_pdata->wake_comp);
 	init_waitqueue_head(&ctrl_pdata->wake_waitq);
 
+	init_completion(&ctrl_pdata->wake_comp);
+	init_waitqueue_head(&ctrl_pdata->wake_waitq);
+
 	rc = mdss_register_panel(ctrl_pdev, &(ctrl_pdata->panel_data));
 	if (rc) {
 		pr_err("%s: unable to register MIPI DSI panel\n", __func__);
