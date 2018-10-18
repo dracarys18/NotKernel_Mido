@@ -757,7 +757,7 @@ adreno_ringbuffer_issueibcmds(struct kgsl_device_private *dev_priv,
 			return -EINVAL;
 
 	/* wait for the suspend gate */
-	wait_for_completion(&device->cmdbatch_gate);
+	wait_for_completion_interruptible(&device->cmdbatch_gate);
 
 	/*
 	 * Clear the wake on touch bit to indicate an IB has been
