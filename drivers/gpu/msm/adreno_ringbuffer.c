@@ -752,7 +752,7 @@ adreno_ringbuffer_issueibcmds(struct kgsl_device_private *dev_priv,
 			return -EINVAL;
 
 	/* wait for the suspend gate */
-	wait_for_completion(&device->cmdbatch_gate);
+	wait_for_completion_interruptible(&device->cmdbatch_gate);
 
 	/* A3XX does not have support for command batch profiling */
 	if (adreno_is_a3xx(adreno_dev) &&
