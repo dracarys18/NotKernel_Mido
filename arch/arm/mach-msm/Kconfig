@@ -344,5 +344,6 @@ config ARCH_MSM8909
 	select MSM_BIMC_BWMON
 	select ARCH_WANT_KMAP_ATOMIC_FLUSH
 
+
 endmenu
 endif

@@ -12,6 +12,7 @@ obj-$(CONFIG_ARCH_MSM8953) += board-8953.o
 obj-$(CONFIG_ARCH_SDM450) += board-sdm450.o
 obj-$(CONFIG_ARCH_MSM8909) += board-8909.o
 
+
 #SMP
 obj-$(CONFIG_SMP) += headsmp.o platsmp.o
 obj-$(CONFIG_HOTPLUG_CPU) += hotplug.o
