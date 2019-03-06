@@ -11,21 +11,19 @@ extern void set_rgb_slider(bl_type_t bl_lvl);
 /* Variable type for rgb */
 typedef unsigned short col_type_t;
 
-#if KLAPSE_MDSS
- #define K_RED    kcal_get_color(0)
- #define K_GREEN  kcal_get_color(1)
- #define K_BLUE   kcal_get_color(2)
+void kcal_ext_apply_values(int red, int green, int blue);
+int kcal_ext_get_value(int color);
 
- extern col_type_t kcal_get_color(unsigned short int code);
- extern void klapse_kcal_push(int r, int g, int b);
-#else
- #define K_RED    kcal_red
- #define K_GREEN  kcal_green
- #define K_BLUE   kcal_blue
+enum rgb {
+	KCAL_RED = 0,
+	KCAL_GREEN,
+	KCAL_BLUE,
+};
 
- extern col_type_t K_RED, K_GREEN, K_BLUE;
-#endif
-
+#define KCAL_COLOR(x) (kcal_ext_get_value(x))
+#define K_RED KCAL_COLOR(KCAL_RED)
+#define K_GREEN KCAL_COLOR(KCAL_GREEN)
+#define K_BLUE KCAL_COLOR(KCAL_BLUE)
 /* Constants - Customize as needed */
 #define DEFAULT_ENABLE 0 /* 0 = off, 1 = time-based, 2 = brightness-based */
 

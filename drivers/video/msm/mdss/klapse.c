@@ -105,13 +105,11 @@ static int get_minutes_before_stop(void)
 
 static void set_rgb(int r, int g, int b)
 {
-#if KLAPSE_MDSS
-	klapse_kcal_push(r,g,b);
-#else
-	K_RED = r;
-	K_GREEN = g;
-	K_BLUE = b;
-#endif
+    kcal_ext_apply_values(r, g, b);
+    
+    current_r = r;
+    current_g = g;
+    current_b = b;
 }
 
 static void set_rgb_brightness(int r,int g,int b)
