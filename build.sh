@@ -11,10 +11,10 @@ LC_ALL=C date +%Y-%m-%d
 date=`date +"%Y%m%d-%H%M"`
 BUILD_START=$(date +"%s")
 KERNEL_DIR=$PWD
-REPACK_DIR=$KERNEL_DIR/NotKernel_zip
+REPACK_DIR=$KERNEL_DIR/zip
 OUT=$KERNEL_DIR/out
 export ARCH=arm64 && export SUBARCH=arm64
-export CROSS_COMPILE="/home/jonsnow/notkernel/toolchain/bin/aarch64-linux-android-"
+export CROSS_COMPILE="/home/jonsnow/NotKernel/toolchain/bin/aarch64-linux-android-"
 
 rm -rf out
 mkdir -p out
