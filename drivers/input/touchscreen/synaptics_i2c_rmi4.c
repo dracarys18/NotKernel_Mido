@@ -1004,7 +1004,6 @@ static int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
 		unsigned short addr, unsigned char *data, unsigned short length)
 {
 	int retval;
-	unsigned char retry;
 	unsigned char buf;
 	struct i2c_msg msg[] = {
 		{
@@ -1029,23 +1028,9 @@ static int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
 	if (retval != PAGE_SELECT_LEN)
 		goto exit;
 
-	for (retry = 0; retry < SYN_I2C_RETRY_TIMES; retry++) {
-		if (i2c_transfer(rmi4_data->i2c_client->adapter, msg, 2) == 2) {
-			retval = length;
-			break;
-		}
-		dev_err(&rmi4_data->i2c_client->dev,
-				"%s: I2C retry %d\n",
-				__func__, retry + 1);
-		msleep(20);
-	}
-
-	if (retry == SYN_I2C_RETRY_TIMES) {
-		dev_err(&rmi4_data->i2c_client->dev,
-				"%s: I2C read over retry limit\n",
-				__func__);
-		retval = -EIO;
-	}
+	retval = i2c_transfer(rmi4_data->i2c_client->adapter, msg, 2);
+	if (retval != 2)
+		return -EINVAL;
 
 exit:
 	mutex_unlock(&(rmi4_data->rmi4_io_ctrl_mutex));
@@ -1067,16 +1052,12 @@ static int synaptics_rmi4_i2c_write(struct synaptics_rmi4_data *rmi4_data,
 		unsigned short addr, unsigned char *data, unsigned short length)
 {
 	int retval;
-	unsigned char retry;
-	unsigned char buf[length + 1];
-	struct i2c_msg msg[] = {
-		{
-			.addr = rmi4_data->i2c_client->addr,
-			.flags = 0,
-			.len = length + 1,
-			.buf = buf,
-		}
-	};
+	unsigned char *buf;
+	struct i2c_msg msg[1];
+
+	buf = kzalloc(length + 1, GPF_KERNEL);
+	if (!buf)
+		return -ENOMEM;
 
 	mutex_lock(&(rmi4_data->rmi4_io_ctrl_mutex));
 
@@ -1087,23 +1068,9 @@ static int synaptics_rmi4_i2c_write(struct synaptics_rmi4_data *rmi4_data,
 	buf[0] = addr & MASK_8BIT;
 	memcpy(&buf[1], &data[0], length);
 
-	for (retry = 0; retry < SYN_I2C_RETRY_TIMES; retry++) {
-		if (i2c_transfer(rmi4_data->i2c_client->adapter, msg, 1) == 1) {
-			retval = length;
-			break;
-		}
-		dev_err(&rmi4_data->i2c_client->dev,
-				"%s: I2C retry %d\n",
-				__func__, retry + 1);
-		msleep(20);
-	}
-
-	if (retry == SYN_I2C_RETRY_TIMES) {
-		dev_err(&rmi4_data->i2c_client->dev,
-				"%s: I2C write over retry limit\n",
-				__func__);
-		retval = -EIO;
-	}
+	retval = i2c_transfer(rmi4_data->i2c_client->adapter, msg, 1);
+	if (retval != 1)
+		return -EINVAL;
 
 exit:
 	mutex_unlock(&(rmi4_data->rmi4_io_ctrl_mutex));
