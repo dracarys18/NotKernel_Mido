@@ -36,3 +36,8 @@ BUILD_END=$(date +"%s")
 DIFF=$(($BUILD_END - $BUILD_START))
 echo -e "Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds."
 
+cd out 
+echo -e "Uploading $FINAL_ZIP to gdrive "
+cp /home/jonsnow/go/bin/gdrive /home/jonsnow/NotKernel/out
+./gdrive upload $FINAL_ZIP
+
