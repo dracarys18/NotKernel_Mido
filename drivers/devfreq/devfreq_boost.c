@@ -18,8 +18,6 @@
 #include <linux/fb.h>
 #include <linux/input.h>
 
-<<<<<<< HEAD
-=======
 
 static unsigned int msm_cpubw_boost_freq = CONFIG_DEVFREQ_MSM_CPUBW_BOOST_FREQ;
 static unsigned short input_boost_duration = CONFIG_DEVFREQ_INPUT_BOOST_DURATION_MS;
@@ -42,7 +40,6 @@ struct boost_dev {
 	spinlock_t lock;
 };
 
->>>>>>> ce4c89fa8295... devfreq_boost: expose devfreq input boost freq and duration to userspace
 struct df_boost_drv {
 	struct boost_dev devices[DEVFREQ_MAX];
 	struct notifier_block fb_notif;
