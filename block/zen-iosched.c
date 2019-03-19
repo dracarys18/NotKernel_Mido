@@ -163,17 +163,18 @@ static int zen_init_queue(struct request_queue *q, struct elevator_type *e)
 {
 	struct zen_data *zdata;
     struct elevator_queue *eq;
+    
     eq = elevator_alloc(q, e);
-    if (!eq){
+    if (!eq)
         return -ENOMEM;
 
 	zdata = kmalloc_node(sizeof(*zdata), GFP_KERNEL, q->node);
-	}
     if (!zdata) {
         kobject_put(&eq->kobj);
         return -ENOMEM;
     }
     eq->elevator_data = zdata;
+	
  
     spin_lock_irq(q->queue_lock);
 	q->elevator = eq;
