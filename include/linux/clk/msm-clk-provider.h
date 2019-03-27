@@ -198,11 +198,15 @@ struct clk {
 	bool opp_table_populated;
 
 	struct dentry *clk_dir;
+	struct clk_rate_stats *rate_stats;
+	ktime_t last_update;
+	struct mutex update_lock;
 };
 
 #define CLK_INIT(name) \
 	.lock = __SPIN_LOCK_UNLOCKED((name).lock), \
 	.prepare_lock = __MUTEX_INITIALIZER((name).prepare_lock), \
+	.update_lock = __MUTEX_INITIALIZER((name).update_lock), \
 	.children = LIST_HEAD_INIT((name).children), \
 	.siblings = LIST_HEAD_INIT((name).siblings), \
 	.list = LIST_HEAD_INIT((name).list)
