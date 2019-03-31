@@ -38,5 +38,5 @@ echo -e "Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) second
 
 cd out 
 echo -e "Uploading $FINAL_ZIP to gdrive "
-gdrive upload $FINAL_ZIP
+gdrive upload $FINAL_ZIP -p 12DlxhIySypF_ADSaF3s3xLGp8f9Z-MRF 
 
