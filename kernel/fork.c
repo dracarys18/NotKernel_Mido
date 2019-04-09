@@ -76,7 +76,7 @@
 #include <linux/aio.h>
 #include <linux/compiler.h>
 #include <linux/cpufreq.h>
-#include <linux/cpu_boost.h>
+#include <linux/cpu_input_boost.h>
 #include <linux/devfreq_boost.h>
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
@@ -1702,14 +1702,12 @@ long do_fork(unsigned long clone_flags,
 	int trace = 0;
 	long nr;
 
-<<<<<<< HEAD
-=======
+
 	if (is_zygote_pid(current->pid)) {
-		do_input_boost_max();
+		cpu_input_boost_kick_max(1250);
 		devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 1250);
 	}
 
->>>>>>> ca98a57269e1... kernel: Boost cpubw devfreq device to the max for app launches
 	/*
 	 * Determine whether and which event to report to ptracer.  When
 	 * called from kernel_thread or CLONE_UNTRACED is explicitly
