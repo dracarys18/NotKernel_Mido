@@ -23,6 +23,8 @@ make O=out mrproper
 make O=out mido_defconfig
 make O=out -j$(nproc --all)
 
+if [ `ls "out/arch/arm64/boot/Image.gz-dtb" 2>/dev/null | wc -l` != "0" ]
+then
 cd $REPACK_DIR
 cp $KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb $REPACK_DIR/
 FINAL_ZIP="NotKernel-$(date +"%Y%m%d"-"%H%M").zip"
@@ -32,6 +34,7 @@ rm *.zip
 cd $KERNEL_DIR
 rm zip/Image.gz-dtb
 
+
 BUILD_END=$(date +"%s")
 DIFF=$(($BUILD_END - $BUILD_START))
 echo -e "Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds."
@@ -40,3 +43,7 @@ cd out
 echo -e "Uploading $FINAL_ZIP to gdrive "
 gdrive upload $FINAL_ZIP -p 12DlxhIySypF_ADSaF3s3xLGp8f9Z-MRF 
 
+else
+echo -e "Compilation failed fix it nubfuck"
+exit 1
+fi
