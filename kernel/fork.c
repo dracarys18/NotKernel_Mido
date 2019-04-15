@@ -1704,8 +1704,8 @@ long do_fork(unsigned long clone_flags,
 
 
 	if (is_zygote_pid(current->pid)) {
-		cpu_input_boost_kick_max(100);
-		devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 100);
+		cpu_input_boost_kick_max(1250);
+		devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 1250);
 	}
 
 	/*
