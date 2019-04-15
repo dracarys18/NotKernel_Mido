@@ -292,7 +292,6 @@ config INPUT_BOOST_FREQ
 	help
 	  Input boost frequency for the CPU.
 
-endif
 
 config REMOVE_INPUT_BOOST_FREQ
 	int "whole cluster return frequency"
@@ -303,7 +302,7 @@ config REMOVE_INPUT_BOOST_FREQ
 	  use cpuinfo.min_freq. In case the device has some kind of quirk
 	  of using a higher than cpuinfo.min_freq (e.g. OnePlus 5/5T/6)
 	  this frequency will be used.
-endif	endif
+endif	
 
 comment "CPU frequency scaling drivers"
 
