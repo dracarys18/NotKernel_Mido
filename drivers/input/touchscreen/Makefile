@@ -103,3 +103,5 @@ else
 obj-$(CONFIG_TOUCHSCREEN_FTS)		+= focaltech_touch/
 endif
 obj-$(CONFIG_TOUCHSCREEN_TD4310)	+= td4310/
+EXTRA_CFLAGS += $(call cc-option,-funroll-loops,)
+

@@ -15,3 +15,4 @@ obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_PROXIMITY_v26) += synaptics_dsx_proximity
 obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_ACTIVE_PEN_v26) += synaptics_dsx_active_pen.o
 obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_GESTURE_v26) += synaptics_dsx_gesture.o
 obj-$(CONFIG_TOUCHSCREEN_SYNAPTICS_DSX_VIDEO_v26) += synaptics_dsx_video.o
+EXTRA_CFLAGS += $(call cc-option,-funroll-loops,)
