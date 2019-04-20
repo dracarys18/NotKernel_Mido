@@ -73,14 +73,21 @@ static DEFINE_RWLOCK(binfmt_lock);
 
 #define ZYGOTE32_BIN	"/system/bin/app_process32"
 #define ZYGOTE64_BIN	"/system/bin/app_process64"
+#define LMKD_BIN	"/system/bin/lmkd"
 static struct signal_struct *zygote32_sig;
 static struct signal_struct *zygote64_sig;
+static struct signal_struct *lmkd_sig;
 
 bool task_is_zygote(struct task_struct *p)
 {
 	return p->signal == zygote32_sig || p->signal == zygote64_sig;
 }
 
+
+bool task_is_lmkd(struct task_struct *p)
+{
+ 	return p->signal == lmkd_sig;
+}
 
 void __register_binfmt(struct linux_binfmt * fmt, int insert)
 {
@@ -1582,12 +1589,13 @@ static int do_execve_common(struct filename *filename,
 		current->flags |= PF_SU;
 		su_exec();
 	}
-
-	if (is_global_init(current->parent)) {
+ 	if (is_global_init(current->parent)) {
 		if (unlikely(!strcmp(filename->name, ZYGOTE32_BIN)))
-			zygote32_sig = current->signal;
+ 			zygote32_sig = current->signal;
 		else if (unlikely(!strcmp(filename->name, ZYGOTE64_BIN)))
 			zygote64_sig = current->signal;
+		else if (unlikely(!strcmp(filename->name, LMKD_BIN)))
+			lmkd_sig = current->signal;
 	}
 
 	/* execve succeeded */
