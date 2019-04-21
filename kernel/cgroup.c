@@ -2429,10 +2429,10 @@ retry_find_task:
 
 	ret = cgroup_attach_task(cgrp, tsk, threadgroup);
 	/* This covers boosting for app launches and app transitions */
+<<<<<<< HEAD
 	if (!ret && !threadgroup && !strcmp(of->kn->parent->name, "top-app") &&
 	    task_is_zygote(tsk->parent))
 		cpu_input_boost_kick_max(1250);
-
 	threadgroup_unlock(tsk);
 
 	put_task_struct(tsk);

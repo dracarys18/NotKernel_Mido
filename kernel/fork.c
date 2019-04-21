@@ -1702,8 +1702,8 @@ long do_fork(unsigned long clone_flags,
 	int trace = 0;
 	long nr;
 
-
-	if (is_zygote_pid(current->pid)) {
+	/* Boost CPU to the max for 100 ms when userspace launches an app */
+	if (task_is_zygote(current)) {
 		cpu_input_boost_kick_max(1250);
 		devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 1250);
 	}
