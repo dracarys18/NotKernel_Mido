@@ -1032,6 +1032,9 @@ static void cpufreq_stats_update_policy_cpu(struct cpufreq_policy *policy)
 		kfree(stat->time_in_state);
 		kfree(stat);
 	}
+	else {
+		return;
+	}
 
 	stat = per_cpu(cpufreq_stats_table, policy->last_cpu);
 	per_cpu(cpufreq_stats_table, policy->cpu) = per_cpu(cpufreq_stats_table,
