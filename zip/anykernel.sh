@@ -5,7 +5,7 @@
 # begin properties
 properties() {
 kernel.string=NotKernel by jonsnow @ xda-developers
-do.devicecheck=1
+do.devicecheck=0
 do.modules=0
 do.cleanup=1
 do.cleanuponabort=1
