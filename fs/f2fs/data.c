@@ -636,7 +636,7 @@ static int f2fs_submit_page_read(struct inode *inode, struct page *page,
 		bio_put(bio);
 		return -EFAULT;
 	}
-	ClearPageError(page);=
+	ClearPageError(page);
 	inc_page_count(sbi, F2FS_RD_DATA);
 	__submit_bio(sbi, bio, DATA);
 	return 0;
