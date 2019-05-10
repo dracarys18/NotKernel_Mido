@@ -59,8 +59,7 @@
 #include "mdss_smmu.h"
 #include "mdss_mdp.h"
 #include "mdp3_ctrl.h"
-
-
+#include "mdss_dsi.h"
 #include "mdss_livedisplay.h"
 #ifdef CONFIG_KLAPSE
 #include "klapse.h"
@@ -4957,6 +4956,9 @@ int mdss_fb_do_ioctl(struct fb_info *info, unsigned int cmd,
 	struct mdp_buf_sync buf_sync;
 	unsigned int dsi_mode = 0;
 	struct mdss_panel_data *pdata = NULL;
+	unsigned int Color_mode = 0;
+	unsigned int CE_mode = 0;
+
 
 	if (!info || !info->par)
 		return -EINVAL;
@@ -5034,6 +5036,24 @@ int mdss_fb_do_ioctl(struct fb_info *info, unsigned int cmd,
 
 	case MSMFB_ASYNC_POSITION_UPDATE:
 		ret = mdss_fb_async_position_update_ioctl(info, argp);
+		break;
+
+	case MSMFB_ENHANCE_SET_GAMMA:
+		ret = copy_from_user(&Color_mode, argp, sizeof(Color_mode));
+		if (ret) {
+			pr_err("%s: MSMFB_ENHANCE_SET_GAMMA ioctl failed\n", __func__);
+			goto exit;
+		}
+		ret = mdss_panel_set_gamma(pdata, Color_mode);
+		break;
+
+	case MSMFB_ENHANCE_SET_CE:
+		ret = copy_from_user(&CE_mode, argp, sizeof(CE_mode));
+		if (ret) {
+			pr_err("%s: MSMFB_ENHANCE_SET_CE ioctl failed\n", __func__);
+			goto exit;
+		}
+		ret = mdss_panel_set_ce(pdata, CE_mode);
 		break;
 
 	default:
