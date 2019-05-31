@@ -258,8 +258,8 @@ static struct f2fs_xattr_entry *__find_xattr(void *base_addr,
 
 	list_for_each_xattr(entry, base_addr) {
 		if ((void *)(entry) + sizeof(__u32) > last_base_addr ||
-
-			(void *)XATTR_NEXT_ENTRY(entry) > last_base_addr)
+			(void *)XATTR_NEXT_ENTRY(entry) +
+			sizeof(__u32) > last_base_addr)
 			return NULL;
 
 		if (entry->e_name_index != index)
@@ -351,8 +351,8 @@ static int lookup_all_xattrs(struct inode *inode, struct page *ipage,
 				const char *name, struct f2fs_xattr_entry **xe,
 				void **base_addr, int *base_size)
 {
-	void *cur_addr, *txattr_addr, *last_txattr_addr;
-	void *last_addr = NULL;
+	void *cur_addr, *txattr_addr, *last_addr = NULL;
+	void *last_txattr_addr = NULL;
 	nid_t xnid = F2FS_I(inode)->i_xattr_nid;
 	unsigned int inline_size = inline_xattr_size(inode);
 	int err = 0;
@@ -360,12 +360,12 @@ static int lookup_all_xattrs(struct inode *inode, struct page *ipage,
 	if (!xnid && !inline_size)
 		return -ENODATA;
 
-	*base_size = XATTR_SIZE(xnid, inode) + XATTR_PADDING_SIZE;
+	*base_size = XATTR_SIZE(xnid, inode);
 	txattr_addr = f2fs_kzalloc(F2FS_I_SB(inode), *base_size, GFP_NOFS);
 	if (!txattr_addr)
 		return -ENOMEM;
 
-	last_txattr_addr = (void *)txattr_addr + XATTR_SIZE(xnid, inode);
+	last_txattr_addr = (void *)txattr_addr + *base_size;
 
 	/* read from inline xattr */
 	if (inline_size) {
@@ -634,8 +634,7 @@ static int __f2fs_setxattr(struct inode *inode, int index,
 			struct page *ipage, int flags)
 {
 	struct f2fs_xattr_entry *here, *last;
-	void *base_addr, *last_base_addr;
-	nid_t xnid = F2FS_I(inode)->i_xattr_nid;
+	void *base_addr, *last_base_addr = NULL;
 	int found, newsize;
 	size_t len;
 	__u32 new_hsize;
@@ -659,8 +658,6 @@ static int __f2fs_setxattr(struct inode *inode, int index,
 	error = read_all_xattrs(inode, ipage, &base_addr);
 	if (error)
 		return error;
-	last_base_addr = (void *)base_addr + XATTR_SIZE(xnid, inode);
-
 	last_base_addr = (void *)base_addr + XATTR_SIZE(xnid, inode);
 
 	/* find entry with wanted name. */
