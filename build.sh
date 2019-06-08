@@ -26,7 +26,7 @@ make O=out -j$(nproc --all)
 if [ `ls "out/arch/arm64/boot/Image.gz-dtb" 2>/dev/null | wc -l` != "0" ]
 then
 cd $REPACK_DIR
-cp $KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb $REPACK_DIR/
+cp $KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb $REPACK_DIR/zImage
 FINAL_ZIP="NotKernel-$(date +"%Y%m%d"-"%H%M").zip"
 zip -r9 "${FINAL_ZIP}" *
 cp *.zip $OUT
