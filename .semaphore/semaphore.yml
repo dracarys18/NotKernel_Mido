@@ -14,5 +14,5 @@ blocks:
         commands:
           - checkout
           - install-package bc
-          - wget https://raw.githubusercontent.com/Yasir-siddiqui/scripts-2/ehe/semaphore
-          - bash semaphore
+          - wget https://raw.githubusercontent.com/Yasir-siddiqui/NotKernelCi/master/script
+          - bash script
