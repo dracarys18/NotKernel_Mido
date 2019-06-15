@@ -17,6 +17,7 @@ export ARCH=arm64 && export SUBARCH=arm64
 export CROSS_COMPILE="/home/jonsnow/NotKernel/toolchain/bin/aarch64-linux-android-"
 
 rm -rf out
+rm -rf zip
 mkdir -p out
 make O=out clean
 make O=out mrproper
@@ -25,6 +26,7 @@ make O=out -j$(nproc --all)
 
 if [ `ls "out/arch/arm64/boot/Image.gz-dtb" 2>/dev/null | wc -l` != "0" ]
 then
+git clone https://github.com/Yasir-siddiqui/AnyKernel3.git zip
 cd $REPACK_DIR
 cp $KERNEL_DIR/out/arch/arm64/boot/Image.gz-dtb $REPACK_DIR/zImage
 FINAL_ZIP="NotKernel-$(date +"%Y%m%d"-"%H%M").zip"
