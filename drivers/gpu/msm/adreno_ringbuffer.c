@@ -822,6 +822,8 @@ int adreno_ringbuffer_submitcmd(struct adreno_device *adreno_dev,
 	struct kgsl_memobj_node *ib;
 	unsigned int numibs = 0;
 	unsigned int *link;
+	unsigned int link_onstack[SZ_256];
+	bool use_onstack_link;
 	unsigned int *cmds;
 	struct kgsl_context *context;
 	struct adreno_context *drawctxt;
@@ -941,10 +943,15 @@ int adreno_ringbuffer_submitcmd(struct adreno_device *adreno_dev,
 				adreno_is_preemption_enabled(adreno_dev))
 		dwords += 8;
 
-	link = kzalloc(sizeof(unsigned int) *  dwords, GFP_KERNEL);
-	if (!link) {
-		ret = -ENOMEM;
-		goto done;
+	use_onstack_link = dwords <= ARRAY_SIZE(link_onstack);
+	if (use_onstack_link) {
+		link = link_onstack;
+	} else {
+		link = kmalloc(sizeof(unsigned int) * dwords, GFP_KERNEL);
+		if (!link) {
+			ret = -ENOMEM;
+			goto done;
+		}
 	}
 
 	cmds = link;
@@ -1097,7 +1104,8 @@ done:
 			numibs, cmdbatch->timestamp,
 			cmdbatch->flags, ret, drawctxt->type);
 
-	kfree(link);
+	if (!use_onstack_link)
+		kfree(link);
 	return ret;
 }
 
