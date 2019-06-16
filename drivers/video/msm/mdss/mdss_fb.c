@@ -62,9 +62,6 @@
 
 
 #include "mdss_livedisplay.h"
-#ifdef CONFIG_KLAPSE
-#include "klapse.h"
-#endif
 
 #ifdef CONFIG_KLAPSE
 #include <linux/klapse.h>
