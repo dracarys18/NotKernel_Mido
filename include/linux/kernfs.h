@@ -183,6 +183,8 @@ struct kernfs_open_file {
 	size_t			atomic_write_len;
 	bool			mmapped;
 	const struct vm_operations_struct *vm_ops;
+       	char			*prealloc_buf;
+
 };
 
 struct kernfs_ops {
