@@ -72,6 +72,11 @@ struct page_info {
 	struct list_head list;
 };
 
+static int ion_heap_is_system_heap_type(enum ion_heap_type type)
+{
+	return type == ((enum ion_heap_type)ION_HEAP_TYPE_SYSTEM);
+}
+
 static struct page *alloc_buffer_page(struct ion_system_heap *heap,
 				      struct ion_buffer *buffer,
 				      unsigned long order,
@@ -82,6 +87,7 @@ static struct page *alloc_buffer_page(struct ion_system_heap *heap,
 	struct page *page;
 	struct ion_page_pool *pool;
 	int vmid = get_secure_vmid(buffer->flags);
+	struct device *dev = heap->heap.priv;
 
 	if (*from_pool) {
 		if (vmid > 0)
@@ -226,6 +232,14 @@ static int ion_system_heap_allocate(struct ion_heap *heap,
 	struct pages_mem data;
 	unsigned int sz;
 	int vmid = get_secure_vmid(buffer->flags);
+	struct device *dev = heap->priv;
+
+	if (ion_heap_is_system_heap_type(buffer->heap->type) &&
+	    is_secure_vmid_valid(vmid)) {
+		pr_info("%s: System heap doesn't support secure allocations\n",
+			__func__);
+		return -EINVAL;
+	}
 
 	if (align > PAGE_SIZE)
 		return -EINVAL;
@@ -315,7 +329,7 @@ static int ion_system_heap_allocate(struct ion_heap *heap,
 	}
 
 	if (nents_sync) {
-		dma_sync_sg_for_device(NULL, table_sync.sgl, table_sync.nents,
+		dma_sync_sg_for_device(dev, table_sync.sgl, table_sync.nents,
 				       DMA_BIDIRECTIONAL);
 		if (vmid > 0) {
 			ret = ion_system_secure_heap_assign_sg(&table_sync,
@@ -372,11 +386,12 @@ void ion_system_heap_free(struct ion_buffer *buffer)
 	LIST_HEAD(pages);
 	int i;
 	int vmid = get_secure_vmid(buffer->flags);
+	struct device *dev = heap->priv;
 
 	if (!(buffer->private_flags & ION_PRIV_FLAG_SHRINKER_FREE) &&
 	    !(buffer->flags & ION_FLAG_POOL_FORCE_ALLOC)) {
 		if (vmid < 0)
-			msm_ion_heap_sg_table_zero(table, buffer->size);
+			msm_ion_heap_sg_table_zero(dev, table, buffer->size);
 	} else if (vmid > 0) {
 		if (ion_system_secure_heap_unassign_sg(table, vmid))
 			return;
@@ -516,109 +531,6 @@ static struct ion_heap_ops system_heap_ops = {
 	.shrink = ion_system_heap_shrink,
 };
 
-static int ion_system_heap_debug_show(struct ion_heap *heap, struct seq_file *s,
-				      void *unused)
-{
-
-	struct ion_system_heap *sys_heap = container_of(heap,
-							struct ion_system_heap,
-							heap);
-	bool use_seq = s != NULL;
-	unsigned long uncached_total = 0;
-	unsigned long cached_total = 0;
-	unsigned long secure_total = 0;
-	struct ion_page_pool *pool;
-	int i, j;
-
-	for (i = 0; i < num_orders; i++) {
-		pool = sys_heap->uncached_pools[i];
-		if (use_seq) {
-			seq_printf(s,
-				"%d order %u highmem pages in uncached pool = %lu total\n",
-				pool->high_count, pool->order,
-				(1 << pool->order) * PAGE_SIZE *
-					pool->high_count);
-			seq_printf(s,
-				"%d order %u lowmem pages in uncached pool = %lu total\n",
-				pool->low_count, pool->order,
-				(1 << pool->order) * PAGE_SIZE *
-					pool->low_count);
-		}
-
-		uncached_total += (1 << pool->order) * PAGE_SIZE *
-			pool->high_count;
-		uncached_total += (1 << pool->order) * PAGE_SIZE *
-			pool->low_count;
-	}
-
-	for (i = 0; i < num_orders; i++) {
-		pool = sys_heap->cached_pools[i];
-		if (use_seq) {
-			seq_printf(s,
-				"%d order %u highmem pages in cached pool = %lu total\n",
-				pool->high_count, pool->order,
-				(1 << pool->order) * PAGE_SIZE * pool->high_count);
-			seq_printf(s,
-				"%d order %u lowmem pages in cached pool = %lu total\n",
-				pool->low_count, pool->order,
-				(1 << pool->order) * PAGE_SIZE *
-					pool->low_count);
-		}
-
-		cached_total += (1 << pool->order) * PAGE_SIZE *
-			pool->high_count;
-		cached_total += (1 << pool->order) * PAGE_SIZE *
-			pool->low_count;
-	}
-
-	for (i = 0; i < num_orders; i++) {
-		for (j = 0; j < VMID_LAST; j++) {
-			if (!is_secure_vmid_valid(j))
-				continue;
-			pool = sys_heap->secure_pools[j][i];
-
-			if (use_seq) {
-				seq_printf(s,
-					"VMID %d: %d order %u highmem pages in secure pool = %lu total\n",
-					j, pool->high_count, pool->order,
-					(1 << pool->order) * PAGE_SIZE *
-						pool->high_count);
-				seq_printf(s,
-					"VMID  %d: %d order %u lowmem pages in secure pool = %lu total\n",
-					j, pool->low_count, pool->order,
-					(1 << pool->order) * PAGE_SIZE *
-						pool->low_count);
-			}
-
-			secure_total += (1 << pool->order) * PAGE_SIZE *
-				pool->high_count;
-			secure_total += (1 << pool->order) * PAGE_SIZE *
-				pool->low_count;
-		}
-	}
-
-
-
-	if (use_seq) {
-		seq_puts(s, "--------------------------------------------\n");
-		seq_printf(s, "uncached pool = %lu cached pool = %lu secure pool = %lu\n",
-				uncached_total, cached_total, secure_total);
-		seq_printf(s, "pool total (uncached + cached + secure) = %lu\n",
-				uncached_total + cached_total + secure_total);
-		seq_puts(s, "--------------------------------------------\n");
-	} else {
-		pr_info("-------------------------------------------------\n");
-		pr_info("uncached pool = %lu cached pool = %lu secure pool = %lu\n",
-				uncached_total, cached_total, secure_total);
-		pr_info("pool total (uncached + cached + secure) = %lu\n",
-				uncached_total + cached_total + secure_total);
-		pr_info("-------------------------------------------------\n");
-	}
-
-	return 0;
-}
-
-
 static void ion_system_heap_destroy_pools(struct ion_page_pool **pools)
 {
 	int i;
@@ -636,7 +548,8 @@ static void ion_system_heap_destroy_pools(struct ion_page_pool **pools)
  * nothing. If it succeeds you'll eventually need to use
  * ion_system_heap_destroy_pools to destroy the pools.
  */
-static int ion_system_heap_create_pools(struct ion_page_pool **pools)
+static int ion_system_heap_create_pools(struct device *dev,
+					struct ion_page_pool **pools)
 {
 	int i;
 	for (i = 0; i < num_orders; i++) {
@@ -645,7 +558,7 @@ static int ion_system_heap_create_pools(struct ion_page_pool **pools)
 
 		if (orders[i])
 			gfp_flags = high_order_gfp_flags;
-		pool = ion_page_pool_create(gfp_flags, orders[i]);
+		pool = ion_page_pool_create(dev, gfp_flags, orders[i]);
 		if (!pool)
 			goto err_create_pool;
 		pools[i] = pool;
@@ -656,11 +569,12 @@ err_create_pool:
 	return 1;
 }
 
-struct ion_heap *ion_system_heap_create(struct ion_platform_heap *unused)
+struct ion_heap *ion_system_heap_create(struct ion_platform_heap *data)
 {
 	struct ion_system_heap *heap;
 	int i;
 	int pools_size = sizeof(struct ion_page_pool *) * num_orders;
+	struct device *dev = data->priv;
 
 	heap = kzalloc(sizeof(struct ion_system_heap), GFP_KERNEL);
 	if (!heap)
@@ -682,18 +596,18 @@ struct ion_heap *ion_system_heap_create(struct ion_platform_heap *unused)
 			heap->secure_pools[i] = kzalloc(pools_size, GFP_KERNEL);
 			if (!heap->secure_pools[i])
 				goto err_create_secure_pools;
-			if (ion_system_heap_create_pools(heap->secure_pools[i]))
+			if (ion_system_heap_create_pools(
+					dev, heap->secure_pools[i]))
 				goto err_create_secure_pools;
 		}
 	}
 
-	if (ion_system_heap_create_pools(heap->uncached_pools))
+	if (ion_system_heap_create_pools(dev, heap->uncached_pools))
 		goto err_create_uncached_pools;
 
-	if (ion_system_heap_create_pools(heap->cached_pools))
+	if (ion_system_heap_create_pools(dev, heap->cached_pools))
 		goto err_create_cached_pools;
 
-	heap->heap.debug_show = ion_system_heap_debug_show;
 	return &heap->heap;
 
 err_create_cached_pools:
@@ -747,6 +661,7 @@ static int ion_system_contig_heap_allocate(struct ion_heap *heap,
 	struct sg_table *table;
 	unsigned long i;
 	int ret;
+	struct device *dev = heap->priv;
 
 	if (align > (PAGE_SIZE << order))
 		return -EINVAL;
@@ -775,7 +690,7 @@ static int ion_system_contig_heap_allocate(struct ion_heap *heap,
 
 	buffer->priv_virt = table;
 
-	ion_pages_sync_for_device(NULL, page, len, DMA_BIDIRECTIONAL);
+	ion_pages_sync_for_device(dev, page, len, DMA_BIDIRECTIONAL);
 
 	return 0;
 
