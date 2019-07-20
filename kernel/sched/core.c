@@ -1420,6 +1420,11 @@ move_list(struct list_head *dst, struct list_head *src, bool sync_rcu)
 	first = src->next;
 	last = src->prev;
 
+	/* Force all performance-critical kthreads onto the big cluster */
+	if (p->flags & PF_PERF_CRITICAL)
+		new_mask = cpu_perf_mask;
+
+
 	if (sync_rcu) {
 		INIT_LIST_HEAD_RCU(src);
 		synchronize_rcu();
