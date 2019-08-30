@@ -14,7 +14,7 @@ KERNEL_DIR=$PWD
 REPACK_DIR=$KERNEL_DIR/zip
 OUT=$KERNEL_DIR/out
 export ARCH=arm64 && export SUBARCH=arm64
-export CROSS_COMPILE="/home/jonsnow/NotKernel/toolchain/bin/aarch64-linux-android-"
+export CROSS_COMPILE="$PWD/toolchain/bin/aarch64-linux-android-"
 
 rm -rf out
 rm -rf zip
