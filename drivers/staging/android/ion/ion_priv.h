@@ -30,10 +30,10 @@
 #include <linux/sched.h>
 #include <linux/shrinker.h>
 #include <linux/types.h>
-#include <linux/device.h>
 #ifdef CONFIG_ION_POOL_CACHE_POLICY
 #include <asm/cacheflush.h>
 #endif
+#include <linux/msm_dma_iommu_mapping.h>
 
 #include "ion.h"
 
@@ -86,6 +86,7 @@ struct ion_buffer {
 	struct sg_table *sg_table;
 	struct page **pages;
 	struct list_head vmas;
+	struct msm_iommu_data iommu_data;
 };
 void ion_buffer_destroy(struct ion_buffer *buffer);
 
@@ -480,8 +481,6 @@ int ion_walk_heaps(struct ion_client *client, int heap_id,
 struct ion_handle *ion_handle_find_by_id(struct ion_client *client, int id);
 
 void ion_handle_put(struct ion_handle *handle);
-
-bool ion_handle_validate(struct ion_client *client, struct ion_handle *handle);
 
 struct ion_buffer *get_buffer(struct ion_handle *handle);
 

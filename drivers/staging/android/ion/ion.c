@@ -27,7 +27,6 @@ struct ion_device {
 struct ion_client {
 	struct ion_device *dev;
 	struct rb_root handles;
-	struct rb_node node;
 	struct idr idr;
 	rwlock_t idr_lock;
 	rwlock_t rb_lock;
@@ -101,6 +100,9 @@ static struct ion_buffer *ion_buffer_create(struct ion_heap *heap,
 		.vma_lock = __MUTEX_INITIALIZER(buffer->vma_lock),
 		.ref = {
 			.refcount = ATOMIC_INIT(1)
+		},
+		.iommu_data = {
+			.lock = __MUTEX_INITIALIZER(buffer->iommu_data.lock)
 		}
 	};
 
@@ -154,8 +156,6 @@ free_buffer:
 
 void ion_buffer_destroy(struct ion_buffer *buffer)
 {
-	if (buffer->kmap_cnt > 0)
-		buffer->heap->ops->unmap_kernel(buffer->heap, buffer);
 	buffer->heap->ops->unmap_dma(buffer->heap, buffer);
 	buffer->heap->ops->free(buffer);
 	if (ion_buffer_fault_user_mappings(buffer))
@@ -168,7 +168,7 @@ static void ion_buffer_kref_destroy(struct kref *kref)
 	struct ion_buffer *buffer = container_of(kref, typeof(*buffer), ref);
 	struct ion_heap *heap = buffer->heap;
 
-	msm_dma_buf_freed(buffer);
+	msm_dma_buf_freed(&buffer->iommu_data);
 
 	if (heap->flags & ION_HEAP_FLAG_DEFER_FREE)
 		ion_heap_freelist_add(heap, buffer);
@@ -250,23 +250,9 @@ static void ion_handle_get(struct ion_handle *handle)
 	atomic_inc(&handle->refcount);
 }
 
-bool ion_handle_validate(struct ion_client *client, struct ion_handle *handle)
-{
-	bool found;
-
-	read_lock(&client->idr_lock);
-	found = idr_find(&client->idr, handle->id) == handle;
-	read_unlock(&client->idr_lock);
-
-	return found;
-}
-
 void *ion_map_kernel(struct ion_client *client, struct ion_handle *handle)
 {
 	struct ion_buffer *buffer;
-
-	if (!ion_handle_validate(client, handle))
-		return ERR_PTR(-EINVAL);
 
 	buffer = handle->buffer;
 	if (!buffer->heap->ops->map_kernel)
@@ -277,8 +263,7 @@ void *ion_map_kernel(struct ion_client *client, struct ion_handle *handle)
 
 void ion_unmap_kernel(struct ion_client *client, struct ion_handle *handle)
 {
-	if (ion_handle_validate(client, handle))
-		ion_handle_kmap_put(handle);
+	ion_handle_kmap_put(handle);
 }
 
 void ion_handle_put(struct ion_handle *handle)
@@ -418,19 +403,14 @@ struct ion_handle *ion_alloc(struct ion_client *client, size_t len,
 
 void ion_free(struct ion_client *client, struct ion_handle *handle)
 {
-	if (ion_handle_validate(client, handle))
-		ion_handle_put(handle);
+	ion_handle_put(handle);
 }
 
 int ion_phys(struct ion_client *client, struct ion_handle *handle,
 	     ion_phys_addr_t *addr, size_t *len)
 {
-	struct ion_buffer *buffer;
+	struct ion_buffer *buffer = handle->buffer;
 
-	if (!ion_handle_validate(client, handle))
-		return -EINVAL;
-
-	buffer = handle->buffer;
 	if (!buffer->heap->ops->phys)
 		return -ENODEV;
 
@@ -473,12 +453,8 @@ void ion_client_destroy(struct ion_client *client)
 int ion_handle_get_flags(struct ion_client *client, struct ion_handle *handle,
 			 unsigned long *flags)
 {
-	struct ion_buffer *buffer;
+	struct ion_buffer *buffer = handle->buffer;
 
-	if (!ion_handle_validate(client, handle))
-		return -EINVAL;
-
-	buffer = handle->buffer;
 	*flags = buffer->flags;
 	return 0;
 }
@@ -486,12 +462,8 @@ int ion_handle_get_flags(struct ion_client *client, struct ion_handle *handle,
 int ion_handle_get_size(struct ion_client *client, struct ion_handle *handle,
 			size_t *size)
 {
-	struct ion_buffer *buffer;
+	struct ion_buffer *buffer = handle->buffer;
 
-	if (!ion_handle_validate(client, handle))
-		return -EINVAL;
-
-	buffer = handle->buffer;
 	*size = buffer->size;
 	return 0;
 }
@@ -499,12 +471,8 @@ int ion_handle_get_size(struct ion_client *client, struct ion_handle *handle,
 struct sg_table *ion_sg_table(struct ion_client *client,
 			      struct ion_handle *handle)
 {
-	struct ion_buffer *buffer;
+	struct ion_buffer *buffer = handle->buffer;
 
-	if (!ion_handle_validate(client, handle))
-		return ERR_PTR(-EINVAL);
-
-	buffer = handle->buffer;
 	return buffer->sg_table;
 }
 
@@ -542,8 +510,6 @@ void ion_pages_sync_for_device(struct device *dev, struct page *page,
 			       size_t size, enum dma_data_direction dir)
 {
 	struct scatterlist sg;
-
-	WARN_ONCE(!dev, "A device is required for dma_sync\n");
 
 	sg_init_table(&sg, 1);
 	sg_set_page(&sg, page, size, 0);
@@ -588,7 +554,8 @@ static struct sg_table *ion_map_dma_buf(struct dma_buf_attachment *attachment,
 					enum dma_data_direction direction)
 {
 	struct dma_buf *dmabuf = attachment->dmabuf;
-	struct ion_buffer *buffer = dmabuf->priv;
+	struct ion_buffer *buffer = container_of(dmabuf->priv, typeof(*buffer),
+						 iommu_data);
 	struct sg_table *table;
 
 	table = ion_dupe_sg_table(buffer->sg_table);
@@ -666,7 +633,8 @@ static const struct vm_operations_struct ion_vma_ops = {
 
 static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 {
-	struct ion_buffer *buffer = dmabuf->priv;
+	struct ion_buffer *buffer = container_of(dmabuf->priv, typeof(*buffer),
+						 iommu_data);
 
 	if (!buffer->heap->ops->map_user)
 		return -EINVAL;
@@ -688,14 +656,16 @@ static int ion_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 
 static void ion_dma_buf_release(struct dma_buf *dmabuf)
 {
-	struct ion_buffer *buffer = dmabuf->priv;
+	struct ion_buffer *buffer = container_of(dmabuf->priv, typeof(*buffer),
+						 iommu_data);
 
 	kref_put(&buffer->ref, ion_buffer_kref_destroy);
 }
 
 static void *ion_dma_buf_kmap(struct dma_buf *dmabuf, unsigned long offset)
 {
-	struct ion_buffer *buffer = dmabuf->priv;
+	struct ion_buffer *buffer = container_of(dmabuf->priv, typeof(*buffer),
+						 iommu_data);
 
 	return buffer->vaddr + offset * PAGE_SIZE;
 }
@@ -704,7 +674,8 @@ static int ion_dma_buf_begin_cpu_access(struct dma_buf *dmabuf, size_t start,
 					size_t len,
 					enum dma_data_direction direction)
 {
-	struct ion_buffer *buffer = dmabuf->priv;
+	struct ion_buffer *buffer = container_of(dmabuf->priv, typeof(*buffer),
+						 iommu_data);
 
 	if (!buffer->heap->ops->map_kernel)
 		return -ENODEV;
@@ -716,7 +687,8 @@ static void ion_dma_buf_end_cpu_access(struct dma_buf *dmabuf, size_t start,
 				       size_t len,
 				       enum dma_data_direction direction)
 {
-	struct ion_buffer *buffer = dmabuf->priv;
+	struct ion_buffer *buffer = container_of(dmabuf->priv, typeof(*buffer),
+						 iommu_data);
 
 	ion_buffer_kmap_put(buffer);
 }
@@ -735,15 +707,10 @@ static const struct dma_buf_ops dma_buf_ops = {
 struct dma_buf *ion_share_dma_buf(struct ion_client *client,
 				  struct ion_handle *handle)
 {
-	struct ion_buffer *buffer;
+	struct ion_buffer *buffer = handle->buffer;
 	struct dma_buf *dmabuf;
 
-	if (!ion_handle_validate(client, handle))
-		return ERR_PTR(-EINVAL);
-
-	buffer = handle->buffer;
-
-	dmabuf = dma_buf_export(buffer, &dma_buf_ops, buffer->size, O_RDWR,
+	dmabuf = dma_buf_export(&buffer->iommu_data, &dma_buf_ops, buffer->size, O_RDWR,
 				NULL);
 	if (!IS_ERR(dmabuf))
 		kref_get(&buffer->ref);
@@ -781,7 +748,7 @@ struct ion_handle *ion_import_dma_buf(struct ion_client *client, int fd)
 	if (dmabuf->ops != &dma_buf_ops)
 		goto put_dmabuf;
 
-	buffer = dmabuf->priv;
+	buffer = container_of(dmabuf->priv, typeof(*buffer), iommu_data);
 	handle = ion_handle_lookup_get(client, buffer);
 	if (IS_ERR(handle)) {
 		handle = ion_handle_create(client, buffer);
@@ -817,7 +784,7 @@ static int ion_sync_for_device(struct ion_client *client, int fd)
 	if (dmabuf->ops != &dma_buf_ops)
 		goto put_dmabuf;
 
-	buffer = dmabuf->priv;
+	buffer = container_of(dmabuf->priv, typeof(*buffer), iommu_data);
 
 	if (get_secure_vmid(buffer->flags) > 0)
 		goto put_dmabuf;
