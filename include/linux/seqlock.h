@@ -35,7 +35,7 @@
 #include <linux/spinlock.h>
 #include <linux/preempt.h>
 #include <linux/lockdep.h>
-#include <asm/processor.h>
+#include <asm-generic/processor.h>
 #include <asm/relaxed.h>
 
 /*
