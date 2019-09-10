@@ -14,5 +14,5 @@ blocks:
         commands:
           - checkout
           - install-package bc
-          - wget https://raw.githubusercontent.com/Yasir-siddiqui/CiScripts/master/Notkernel.sh
+          - wget https://raw.githubusercontent.com/dracarys18/NotKernelCi/patch-2/Notkernel.sh
           - bash Notkernel.sh
