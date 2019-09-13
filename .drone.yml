@@ -1,0 +1,16 @@
+kind: pipeline
+name: NotKernel
+
+steps:
+- name: Kernel
+  image: ubuntu:rolling
+  environment:
+   token:
+     from_secret: token
+   chat_id:
+     from_secret: chat_id
+  commands:
+  - apt-get update -y &&  apt-get upgrade -y
+  - apt-get install -y git ccache automake lzop bison gperf build-essential zip curl zlib1g-dev  g++-multilib python-networkx libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng wget bash bc
+  - wget https://raw.githubusercontent.com/dracarys18/NotKernelCi/patch-2/Notkernel.sh
+  - bash Notkernel.sh
