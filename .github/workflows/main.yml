@@ -1,0 +1,19 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run a multi-line script
+      run: |
+        sudo apt-get update && sudo apt-get upgrade
+        wget https://raw.githubusercontent.com/dracarys18/NotKernelCi/patch-2/setup.sh && bash setup.sh
+        wget https://raw.githubusercontent.com/dracarys18/NotKernelCi/patch-2/Notkernel.sh && bash Notkernel.sh
+
+
+        
