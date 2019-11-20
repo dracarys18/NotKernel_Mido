@@ -2061,6 +2061,12 @@ void composite_disconnect(struct usb_gadget *gadget)
 	 * disconnect callbacks?
 	 */
 	spin_lock_irqsave(&cdev->lock, flags);
+        if (cdev->config) {
+		if (!gadget_is_dwc3(gadget) && !cdev->suspended) {
+			spin_unlock_irqrestore(&cdev->lock, flags);
+			msm_do_bam_disable_enable(CI_CTRL);
+			spin_lock_irqsave(&cdev->lock, flags);
+		}
 	cdev->suspended = 0;
 	if (cdev->config)
 		reset_config(cdev);
