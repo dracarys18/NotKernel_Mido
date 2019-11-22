@@ -2,8 +2,8 @@
 echo "Cloning dependencies"
 git clone --depth=1 https://github.com/dracarys18/NotKernel kernel
 cd kernel
-git clone -q -j32 https://github.com/dracarys18/toolchain.git 
-git clone -q -j32 https://github.com/dracarys18/toolchain32.git
+git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 -b android-9.0.0_r39 toolchain
+git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 -b android-9.0.0_r39 toolchain32
 git clone --depth=1 https://github.com/dracarys18/AnyKernel3.git Anykernel
 echo "Done"
 GCC="$(pwd)/aarch64-linux-android-"
@@ -13,6 +13,7 @@ START=$(date +"%s")
 export CONFIG_PATH=$PWD/arch/arm64/configs/mido_defconfig
 PATH="${PWD}/toolchain/bin:${PWD}/toolchain32/bin:${PATH}"
 export CROSS_COMPILE_ARM32="$(pwd)/toolchain32/bin/arm-linux-androideabi-"
+export CROSS_COMPILE="aarch64-linux-android-"
 export ARCH=arm64
 export KBUILD_BUILD_HOST=NotKernel
 export KBUILD_BUILD_USER="root"
@@ -32,7 +33,7 @@ function sendinfo() {
 }
 # Push kernel to channel
 function push() {
-    cd AnyKernel
+    cd Anykernel
     ZIP=$(echo *.zip)
     curl -F document=@$ZIP "https://api.telegram.org/bot$token/sendDocument" \
         -F chat_id="$chat_id" \
@@ -46,23 +47,27 @@ function finerr() {
         -d chat_id="$chat_id" \
         -d "disable_web_page_preview=true" \
         -d "parse_mode=markdown" \
-        -d text="Build throw an error(s)"
+        -d text="Build is throwing  error(s)"
     exit 1
 }
 # Compile plox
 function compile() {
     make O=out clean && make O=out mrproper && make O=out mido_defconfig
     make O=out -j$(nproc --all) 2>&1| tee build.log
-     cp out/arch/arm64/boot/Image.gz-dtb AnyKernel/zImage
+    if ! [ -a $IMAGE ]; then
+                finerr
+                exit 1
+   else
+    cp $PWD/out/arch/arm64/boot/Image.gz-dtb $PWD/Anykernel/zImage
+   fi 
 }
 
 # Zipping
 function zipping() {
-    cd AnyKernel || exit 1
+    cd Anykernel || exit 1
     zip -r9 NotKernel-Mido-${TANGGAL}.zip *
     cd .. 
 }
-sticker
 sendinfo
 compile
 zipping
