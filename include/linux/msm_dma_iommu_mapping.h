@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -17,12 +17,6 @@
 #include <linux/dma-buf.h>
 #include <linux/scatterlist.h>
 #include <linux/dma-mapping.h>
-
-struct msm_iommu_meta;
-struct msm_iommu_data {
-	struct msm_iommu_meta *meta;
-	struct mutex lock;
-};
 
 #ifdef CONFIG_IOMMU_API
 /*
@@ -56,13 +50,12 @@ static inline int msm_dma_map_sg(struct device *dev, struct scatterlist *sg,
 void msm_dma_unmap_sg(struct device *dev, struct scatterlist *sgl, int nents,
 		      enum dma_data_direction dir, struct dma_buf *dma_buf);
 
-int msm_dma_unmap_all_for_dev(struct device *dev);
 
 /*
  * Below is private function only to be called by framework (ION) and not by
  * clients.
  */
-void msm_dma_buf_freed(struct msm_iommu_data *data);
+void msm_dma_buf_freed(void *buffer);
 
 #else /*CONFIG_IOMMU_API*/
 
@@ -94,11 +87,6 @@ static inline void msm_dma_unmap_sg(struct device *dev,
 					enum dma_data_direction dir,
 					struct dma_buf *dma_buf)
 {
-}
-
-int msm_dma_unmap_all_for_dev(struct device *dev)
-{
-	return 0;
 }
 
 static inline void msm_dma_buf_freed(void *buffer) {}

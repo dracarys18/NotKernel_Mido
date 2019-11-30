@@ -119,6 +119,17 @@ static struct ion_heap_desc ion_heap_meta[] = {
 };
 #endif
 
+static int msm_ion_lowmem_notifier(struct notifier_block *nb,
+					unsigned long action, void *data)
+{
+	show_ion_usage(idev);
+	return 0;
+}
+
+static struct notifier_block msm_ion_nb = {
+	.notifier_call = msm_ion_lowmem_notifier,
+};
+
 struct ion_client *msm_ion_client_create(const char *name)
 {
 	/*
@@ -131,7 +142,7 @@ struct ion_client *msm_ion_client_create(const char *name)
 	if (IS_ERR(idev))
 		return (struct ion_client *)idev;
 
-	return ion_client_create(idev);
+	return ion_client_create(idev, name);
 }
 EXPORT_SYMBOL(msm_ion_client_create);
 
@@ -278,10 +289,9 @@ static int ion_pages_cache_ops(struct ion_client *client,
 	int i;
 	unsigned int len = 0;
 	void (*op)(const void *, const void *);
-	struct ion_buffer *buffer;
 
-	buffer = get_buffer(handle);
-	table = buffer->sg_table;
+
+	table = ion_sg_table(client, handle);
 	if (IS_ERR_OR_NULL(table))
 		return PTR_ERR(table);
 
@@ -326,14 +336,14 @@ int ion_do_cache_op(struct ion_client *client, struct ion_handle *handle,
 			void *uaddr, unsigned long offset, unsigned long len,
 			unsigned int cmd)
 {
-	int ret = 0;
+	int ret = -EINVAL;
 	unsigned long flags;
 	struct sg_table *table;
 	struct page *page;
-	struct ion_buffer *buffer;
 
-	buffer = get_buffer(handle);
-	flags = buffer->flags;
+	ret = ion_handle_get_flags(client, handle, &flags);
+	if (ret)
+		return -EINVAL;
 
 	if (!ION_IS_CACHED(flags))
 		return 0;
@@ -341,7 +351,7 @@ int ion_do_cache_op(struct ion_client *client, struct ion_handle *handle,
 	if (get_secure_vmid(flags) > 0)
 		return 0;
 
-	table = buffer->sg_table;
+	table = ion_sg_table(client, handle);
 
 	if (IS_ERR_OR_NULL(table))
 		return PTR_ERR(table);
@@ -717,17 +727,18 @@ long msm_ion_custom_ioctl(struct ion_client *client,
 		struct ion_handle *handle = NULL;
 		int ret;
 		struct mm_struct *mm = current->active_mm;
-		bool handle_exists;
 
-		handle_exists = data.flush_data.handle > 0;
-		if (handle_exists) {
-			handle = ion_handle_find_by_id(
-					client, (int)data.flush_data.handle);
+		if (data.flush_data.handle > 0) {
+			mutex_lock(&client->lock);
+			handle = ion_handle_get_by_id_nolock(client,
+						(int)data.flush_data.handle);
 			if (IS_ERR(handle)) {
+				mutex_unlock(&client->lock);
 				pr_info("%s: Could not find handle: %d\n",
 					__func__, (int)data.flush_data.handle);
 				return PTR_ERR(handle);
 			}
+			mutex_unlock(&client->lock);
 		} else {
 			handle = ion_import_dma_buf(client, data.flush_data.fd);
 			if (IS_ERR(handle)) {
@@ -755,8 +766,7 @@ long msm_ion_custom_ioctl(struct ion_client *client,
 		}
 		up_read(&mm->mmap_sem);
 
-		if (!handle_exists)
-			ion_handle_put(handle);
+		ion_free(client, handle);
 
 		if (ret < 0)
 			return ret;
@@ -966,6 +976,29 @@ static struct ion_heap *msm_ion_heap_create(struct ion_platform_heap *heap_data)
 	return heap;
 }
 
+static void msm_ion_heap_destroy(struct ion_heap *heap)
+{
+	if (!heap)
+		return;
+
+	switch ((int)heap->type) {
+#ifdef CONFIG_CMA
+	case ION_HEAP_TYPE_SECURE_DMA:
+		ion_secure_cma_heap_destroy(heap);
+		break;
+#endif
+	case ION_HEAP_TYPE_SYSTEM_SECURE:
+		ion_system_secure_heap_destroy(heap);
+		break;
+
+	case ION_HEAP_TYPE_HYP_CMA:
+		ion_cma_secure_heap_destroy(heap);
+		break;
+	default:
+		ion_heap_destroy(heap);
+	}
+}
+
 struct ion_heap *get_ion_heap(int heap_id)
 {
 	int i;
@@ -1053,6 +1086,7 @@ static int msm_ion_probe(struct platform_device *pdev)
 	 */
 	idev = new_dev;
 
+	show_mem_notifier_register(&msm_ion_nb);
 	return 0;
 
 freeheaps:
@@ -1063,6 +1097,19 @@ out:
 	return err;
 }
 
+static int msm_ion_remove(struct platform_device *pdev)
+{
+	struct ion_device *idev = platform_get_drvdata(pdev);
+	int i;
+
+	for (i = 0; i < num_heaps; i++)
+		msm_ion_heap_destroy(heaps[i]);
+
+	ion_device_destroy(idev);
+	kfree(heaps);
+	return 0;
+}
+
 static struct of_device_id msm_ion_match_table[] = {
 	{.compatible = ION_COMPAT_STR},
 	{},
@@ -1070,6 +1117,7 @@ static struct of_device_id msm_ion_match_table[] = {
 
 static struct platform_driver msm_ion_driver = {
 	.probe = msm_ion_probe,
+	.remove = msm_ion_remove,
 	.driver = {
 		.name = "ion-msm",
 		.of_match_table = msm_ion_match_table,
@@ -1080,4 +1128,12 @@ static int __init msm_ion_init(void)
 {
 	return platform_driver_register(&msm_ion_driver);
 }
+
+static void __exit msm_ion_exit(void)
+{
+	platform_driver_unregister(&msm_ion_driver);
+}
+
 subsys_initcall(msm_ion_init);
+module_exit(msm_ion_exit);
+
