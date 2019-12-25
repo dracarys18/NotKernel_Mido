@@ -58,7 +58,7 @@ function compile() {
                 finerr
                 exit 1
    else
-    cp $PWD/out/arch/arm64/boot/Image.gz-dtb $PWD/Anykernel/
+    cp $PWD/out/arch/arm64/boot/Image.gz-dtb $PWD/Anykernel/zImage
    fi 
 }
 
