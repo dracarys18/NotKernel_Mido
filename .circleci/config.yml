@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   compile:
    docker:
-      - image: najahi/oven:latest
+      - image: ubuntu:18.04
    steps:
       - run:
           command: |
