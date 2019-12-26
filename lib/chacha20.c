@@ -11,7 +11,7 @@
 
 #include <linux/kernel.h>
 #include <linux/export.h>
-
+#include <string.h> 
 #include <asm/neon.h>
 
 asmlinkage void chacha_block_xor_neon(u32 *state, u8 *dst, const u8 *src, int nrounds);
