@@ -10,7 +10,6 @@
  *
  */
 
-#include <linux/cpufreq.h>
 #include <linux/device.h>
 #include <linux/err.h>
 #include <linux/init.h>
@@ -1963,8 +1962,6 @@ EXPORT_SYMBOL_GPL(device_move);
 void device_shutdown(void)
 {
 	struct device *dev, *parent;
-
-	cpufreq_suspend();
 
 	spin_lock(&devices_kset->list_lock);
 	/*

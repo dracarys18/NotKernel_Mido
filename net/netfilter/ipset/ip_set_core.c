@@ -1885,9 +1885,8 @@ ip_set_sockfn_get(struct sock *sk, int optval, void __user *user, int *len)
 		}
 
 		req_version->version = IPSET_PROTOCOL;
-		if (copy_to_user(user, req_version,
-				 sizeof(struct ip_set_req_version)))
-			ret = -EFAULT;
+		ret = copy_to_user(user, req_version,
+				   sizeof(struct ip_set_req_version));
 		goto done;
 	}
 	case IP_SET_OP_GET_BYNAME: {
@@ -1944,8 +1943,7 @@ ip_set_sockfn_get(struct sock *sk, int optval, void __user *user, int *len)
 	}	/* end of switch(op) */
 
 copy:
-	if (copy_to_user(user, data, copylen))
-		ret = -EFAULT;
+	ret = copy_to_user(user, data, copylen);
 
 done:
 	vfree(data);

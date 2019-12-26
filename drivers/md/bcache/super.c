@@ -1415,12 +1415,15 @@ static void cache_set_flush(struct closure *cl)
 	struct btree *b;
 	unsigned i;
 
+	if (!c)
+		closure_return(cl);
+
 	bch_cache_accounting_destroy(&c->accounting);
 
 	kobject_put(&c->internal);
 	kobject_del(&c->kobj);
 
-	if (!IS_ERR_OR_NULL(c->gc_thread))
+	if (c->gc_thread)
 		kthread_stop(c->gc_thread);
 
 	if (!IS_ERR_OR_NULL(c->root))
@@ -1574,7 +1577,7 @@ err:
 	return NULL;
 }
 
-static int run_cache_set(struct cache_set *c)
+static void run_cache_set(struct cache_set *c)
 {
 	const char *err = "cannot allocate memory";
 	struct cached_dev *dc, *t;
@@ -1665,9 +1668,7 @@ static int run_cache_set(struct cache_set *c)
 		if (j->version < BCACHE_JSET_VERSION_UUID)
 			__uuid_write(c);
 
-		err = "bcache: replay journal failed";
-		if (bch_journal_replay(c, &journal))
-			goto err;
+		bch_journal_replay(c, &journal);
 	} else {
 		pr_notice("invalidating existing data");
 
@@ -1735,13 +1736,11 @@ static int run_cache_set(struct cache_set *c)
 	flash_devs_run(c);
 
 	set_bit(CACHE_SET_RUNNING, &c->flags);
-	return 0;
+	return;
 err:
 	closure_sync(&cl);
 	/* XXX: test this, it's broken */
 	bch_cache_set_error(c, "%s", err);
-
-	return -EIO;
 }
 
 static bool can_attach_cache(struct cache *ca, struct cache_set *c)
@@ -1805,11 +1804,8 @@ found:
 	ca->set->cache[ca->sb.nr_this_dev] = ca;
 	c->cache_by_alloc[c->caches_loaded++] = ca;
 
-	if (c->caches_loaded == c->sb.nr_in_set) {
-		err = "failed to run cache set";
-		if (run_cache_set(c) < 0)
-			goto err;
-	}
+	if (c->caches_loaded == c->sb.nr_in_set)
+		run_cache_set(c);
 
 	return NULL;
 err:

@@ -606,6 +606,7 @@ err_tx_unbind:
 err_unmap:
 	xenvif_unmap_frontend_rings(queue);
 err:
+	module_put(THIS_MODULE);
 	return err;
 }
 

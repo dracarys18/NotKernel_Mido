@@ -351,7 +351,7 @@ static int smsusb_init_device(struct usb_interface *intf, int board_id)
 	struct smsdevice_params_t params;
 	struct smsusb_device_t *dev;
 	int i, rc;
-	int align = 0;
+	int in_maxp = 0;
 
 	/* create device object */
 	dev = kzalloc(sizeof(struct smsusb_device_t), GFP_KERNEL);
@@ -371,13 +371,14 @@ static int smsusb_init_device(struct usb_interface *intf, int board_id)
 
 		if (desc->bEndpointAddress & USB_DIR_IN) {
 			dev->in_ep = desc->bEndpointAddress;
-			align = usb_endpoint_maxp(desc) - sizeof(struct sms_msg_hdr);
+			in_maxp = usb_endpoint_maxp(desc);
 		} else {
 			dev->out_ep = desc->bEndpointAddress;
 		}
 	}
 
-	if (!dev->in_ep || !dev->out_ep || align < 0) {	/* Missing endpoints? */
+	sms_info("in_ep = %02x, out_ep = %02x", dev->in_ep, dev->out_ep);
+	if (!dev->in_ep || !dev->out_ep) {	/* Missing endpoints? */
 		smsusb_term_device(intf);
 		return -ENODEV;
 	}
@@ -396,7 +397,7 @@ static int smsusb_init_device(struct usb_interface *intf, int board_id)
 		/* fall-thru */
 	default:
 		dev->buffer_size = USB2_BUFFER_SIZE;
-		dev->response_alignment = align;
+		dev->response_alignment = in_maxp - sizeof(struct sms_msg_hdr);
 
 		params.flags |= SMS_DEVICE_FAMILY2;
 		break;
