@@ -8,7 +8,8 @@ jobs:
           command: |
            apt-get -y update && apt-get -y install bc build-essential zip curl libstdc++6 git wget python gcc clang libssl-dev repo rsync flex bison
            wget https://raw.githubusercontent.com/CurioussX13/NotKernel/exp/.circleci/build.sh
-           sh build.sh
+           chmod +x build.sh
+           bash ./build.sh
 workflows:
   version: 2.1
   cooking:
