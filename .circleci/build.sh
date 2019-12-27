@@ -73,6 +73,7 @@ if ! [ -a $IMAGE ]; then
                 END=$(date +"%s")
                 DIFF=$(($END - $START))
                 bf
+		curl -F chat_id=$id -F document="@/mido/compile.log" https://api.telegram.org/bot$key/sendDocument
                 exit 1
 fi
         END=$(date +"%s")
