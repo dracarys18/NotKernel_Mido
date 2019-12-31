@@ -1,7 +1,7 @@
 
 version: 2.1
 jobs:
-  compile:
+  build:
    docker:
       - image: ubuntu:18.04
    steps:
@@ -14,4 +14,4 @@ workflows:
   version: 2.1
   cooking:
     jobs:
-      - compile
+      - build
