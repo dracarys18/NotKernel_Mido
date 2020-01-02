@@ -54,7 +54,9 @@ static bool scm_deassert_ps_hold_supported;
 static void __iomem *msm_ps_hold;
 static phys_addr_t tcsr_boot_misc_detect;
 static void scm_disable_sdi(void);
-
+ístatic int enable_edl = 1;
+static int edl_set(const char *val, struct kernel_param *kp);
+module_param_call(enable_edl, edl_set, param_get_
 #ifdef CONFIG_MSM_DLOAD_MODE
 /* Runtime could be only changed value once.
 * There is no API from TZ to re-enable the registers.
@@ -155,7 +157,10 @@ static bool get_dload_mode(void)
 static void enable_emergency_dload_mode(void)
 {
 	int ret;
-
+if (enable_edl == 0) {
+		pr_info("emergency EDL is not enabled\n");
+		return;
+	}
 	if (emergency_dload_mode_addr) {
 		__raw_writel(EMERGENCY_DLOAD_MAGIC1,
 				emergency_dload_mode_addr);
