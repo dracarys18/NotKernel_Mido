@@ -218,7 +218,24 @@ static bool get_dload_mode(void)
 	return false;
 }
 #endif
+static int edl_set(const char *val, struct kernel_param *kp)
+{
+	int ret;
+	int old_val = enable_edl;
 
+	ret = param_set_int(val, kp);
+
+	if (ret)
+		return ret;
+
+	/* If enable_edl is not zero or one, ignore. */
+	if (enable_edl >> 1) {
+		enable_edl = old_val;
+		return -EINVAL;
+	}
+
+	return 0;
+}
 static void scm_disable_sdi(void)
 {
 	int ret;
