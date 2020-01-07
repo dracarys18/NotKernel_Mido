@@ -233,7 +233,6 @@ static void __exit bictcp_unregister(void)
 
 module_init(bictcp_register);
 module_exit(bictcp_unregister);
-
 MODULE_AUTHOR("Stephen Hemminger");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("BIC TCP");
