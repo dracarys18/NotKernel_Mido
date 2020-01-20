@@ -235,11 +235,6 @@ static ssize_t ramoops_pstore_read(u64 *id, enum pstore_type_id *type,
 	if (*buf == NULL)
 		return -ENOMEM;
 
-<<<<<<< HEAD
-=======
-	memcpy(*buf, (char *)persistent_ram_old(prz) + header_length, size);
-	persistent_ram_ecc_string(prz, *buf + size, ecc_notice_size + 1);
->>>>>>> a28726b... pstore/ram: Strip ramoops header for correct decompression
 
 	memcpy(*buf, (char *)persistent_ram_old(prz) + header_length, size);
 	persistent_ram_ecc_string(prz, *buf + size, *ecc_notice_size + 1);
