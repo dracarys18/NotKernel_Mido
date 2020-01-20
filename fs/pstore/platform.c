@@ -258,8 +258,6 @@ static void allocate_zlib(void)
 
 }
 
-<<<<<<< HEAD
-=======
 static void free_zlib(void)
 {
 	kfree(stream.workspace);
@@ -446,7 +444,7 @@ static void free_buf_for_compression(void)
 		pr_err("free compression buffer error!\n");
 }
 
->>>>>>> 8cfc8dd... pstore: add lzo/lz4 compression support
+
 /*
  * Called when compression fails, since the printk buffer
  * would be fetched for compression calling it again when
