@@ -226,14 +226,10 @@ static ssize_t ramoops_pstore_read(u64 *id, enum pstore_type_id *type,
 	if (*buf == NULL)
 		return -ENOMEM;
 
-<<<<<<< HEAD
-	memcpy(*buf, persistent_ram_old(prz), size);
-	ramoops_read_kmsg_hdr(*buf, time, compressed);
-	persistent_ram_ecc_string(prz, *buf + size, ecc_notice_size + 1);
-=======
+
 	memcpy(*buf, (char *)persistent_ram_old(prz) + header_length, size);
 	persistent_ram_ecc_string(prz, *buf + size, *ecc_notice_size + 1);
->>>>>>> 8cfc8dd... pstore: add lzo/lz4 compression support
+
 
 	return size;
 }
