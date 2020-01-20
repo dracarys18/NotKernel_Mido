@@ -58,11 +58,11 @@ static loff_t dev_nvram_llseek(struct file *file, loff_t offset, int origin)
 {
 	int size;
 
-<<<<<<< HEAD
+
 	if (ppc_md.nvram_size == NULL)
 		return -ENODEV;
 	size = ppc_md.nvram_size();
-=======
+
 	/* Look for ours */
 	p = nvram_find_partition(part->name, NVRAM_SIG_OS, &size);
 
