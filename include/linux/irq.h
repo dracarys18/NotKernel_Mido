@@ -1,3 +1,6 @@
+
+
+
 #ifndef _LINUX_IRQ_H
 #define _LINUX_IRQ_H
 
@@ -218,36 +221,36 @@ enum {
 	IRQD_AFFINITY_MANAGED		= (1 << 21),
 };
 
-#define __irqd_to_state(d) ACCESS_PRIVATE((d)->common, state_use_accessors)
+#define 	d->state_use_accessors (d) ACCESS_PRIVATE((d)->common, state_use_accessors)
 
 static inline bool irqd_is_setaffinity_pending(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_SETAFFINITY_PENDING;
+	return 	d->state_use_accessors (d) & IRQD_SETAFFINITY_PENDING;
 }
 
 static inline bool irqd_is_per_cpu(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_PER_CPU;
+	return 	d->state_use_accessors (d) & IRQD_PER_CPU;
 }
 
 static inline bool irqd_can_balance(struct irq_data *d)
 {
-	return !(__irqd_to_state(d) & (IRQD_PER_CPU | IRQD_NO_BALANCING));
+	return !(	d->state_use_accessors (d) & (IRQD_PER_CPU | IRQD_NO_BALANCING));
 }
 
 static inline bool irqd_affinity_was_set(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_AFFINITY_SET;
+	return 	d->state_use_accessors (d) & IRQD_AFFINITY_SET;
 }
 
 static inline void irqd_mark_affinity_was_set(struct irq_data *d)
 {
-	__irqd_to_state(d) |= IRQD_AFFINITY_SET;
+		d->state_use_accessors (d) |= IRQD_AFFINITY_SET;
 }
 
 static inline u32 irqd_get_trigger_type(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_TRIGGER_MASK;
+	return 	d->state_use_accessors (d) & IRQD_TRIGGER_MASK;
 }
 
 /*
@@ -255,81 +258,81 @@ static inline u32 irqd_get_trigger_type(struct irq_data *d)
  */
 static inline void irqd_set_trigger_type(struct irq_data *d, u32 type)
 {
-	__irqd_to_state(d) &= ~IRQD_TRIGGER_MASK;
-	__irqd_to_state(d) |= type & IRQD_TRIGGER_MASK;
+		d->state_use_accessors (d) &= ~IRQD_TRIGGER_MASK;
+		d->state_use_accessors (d) |= type & IRQD_TRIGGER_MASK;
 }
 
 static inline bool irqd_is_level_type(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_LEVEL;
+	return 	d->state_use_accessors (d) & IRQD_LEVEL;
 }
 
 static inline bool irqd_is_wakeup_set(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_WAKEUP_STATE;
+	return 	d->state_use_accessors (d) & IRQD_WAKEUP_STATE;
 }
 
 static inline bool irqd_can_move_in_process_context(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_MOVE_PCNTXT;
+	return 	d->state_use_accessors (d) & IRQD_MOVE_PCNTXT;
 }
 
 static inline bool irqd_irq_disabled(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_IRQ_DISABLED;
+	return 	d->state_use_accessors (d) & IRQD_IRQ_DISABLED;
 }
 
 static inline bool irqd_irq_masked(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_IRQ_MASKED;
+	return 	d->state_use_accessors (d) & IRQD_IRQ_MASKED;
 }
 
 static inline bool irqd_irq_inprogress(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_IRQ_INPROGRESS;
+	return 	d->state_use_accessors (d) & IRQD_IRQ_INPROGRESS;
 }
 
 static inline bool irqd_is_wakeup_armed(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_WAKEUP_ARMED;
+	return 	d->state_use_accessors (d) & IRQD_WAKEUP_ARMED;
 }
 
 static inline bool irqd_is_forwarded_to_vcpu(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_FORWARDED_TO_VCPU;
+	return 	d->state_use_accessors (d) & IRQD_FORWARDED_TO_VCPU;
 }
 
 static inline void irqd_set_forwarded_to_vcpu(struct irq_data *d)
 {
-	__irqd_to_state(d) |= IRQD_FORWARDED_TO_VCPU;
+		d->state_use_accessors (d) |= IRQD_FORWARDED_TO_VCPU;
 }
 
 static inline void irqd_clr_forwarded_to_vcpu(struct irq_data *d)
 {
-	__irqd_to_state(d) &= ~IRQD_FORWARDED_TO_VCPU;
+		d->state_use_accessors (d) &= ~IRQD_FORWARDED_TO_VCPU;
 }
 
 static inline bool irqd_affinity_is_managed(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_AFFINITY_MANAGED;
+	return 	d->state_use_accessors (d) & IRQD_AFFINITY_MANAGED;
 }
 
 static inline bool irqd_is_activated(struct irq_data *d)
 {
-	return __irqd_to_state(d) & IRQD_ACTIVATED;
+	return 	d->state_use_accessors (d) & IRQD_ACTIVATED;
 }
 
 static inline void irqd_set_activated(struct irq_data *d)
 {
-	__irqd_to_state(d) |= IRQD_ACTIVATED;
+		d->state_use_accessors (d) |= IRQD_ACTIVATED;
 }
 
 static inline void irqd_clr_activated(struct irq_data *d)
 {
-	__irqd_to_state(d) &= ~IRQD_ACTIVATED;
+		d->state_use_accessors (d) &= ~IRQD_ACTIVATED;
 }
 
-#undef __irqd_to_state
+#undef 	d->state_use_accessors 
 
 static inline irq_hw_number_t irqd_to_hwirq(struct irq_data *d)
 {
