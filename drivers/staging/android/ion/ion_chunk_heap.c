@@ -30,7 +30,7 @@ struct ion_chunk_heap {
 	ion_phys_addr_t base;
 	unsigned long chunk_size;
 	unsigned long size;
-	unsigned long allocated;
+	atomic_long_t allocated;
 };
 
 static int ion_chunk_heap_allocate(struct ion_heap *heap,
@@ -52,7 +52,8 @@ static int ion_chunk_heap_allocate(struct ion_heap *heap,
 	allocated_size = ALIGN(size, chunk_heap->chunk_size);
 	num_chunks = allocated_size / chunk_heap->chunk_size;
 
-	if (allocated_size > chunk_heap->size - chunk_heap->allocated)
+	if (allocated_size >
+	    chunk_heap->size - atomic_long_read(&chunk_heap->allocated))
 		return -ENOMEM;
 
 	table = kmalloc(sizeof(struct sg_table), GFP_KERNEL);
@@ -76,7 +77,7 @@ static int ion_chunk_heap_allocate(struct ion_heap *heap,
 	}
 
 	buffer->priv_virt = table;
-	chunk_heap->allocated += allocated_size;
+	atomic_long_add(allocated_size, &chunk_heap->allocated);
 	return 0;
 err:
 	sg = table->sgl;
@@ -99,20 +100,21 @@ static void ion_chunk_heap_free(struct ion_buffer *buffer)
 	struct scatterlist *sg;
 	int i;
 	unsigned long allocated_size;
+	struct device *dev = heap->priv;
 
 	allocated_size = ALIGN(buffer->size, chunk_heap->chunk_size);
 
 	ion_heap_buffer_zero(buffer);
 
 	if (ion_buffer_cached(buffer))
-		dma_sync_sg_for_device(NULL, table->sgl, table->nents,
-							DMA_BIDIRECTIONAL);
+		dma_sync_sg_for_device(dev, table->sgl, table->nents,
+				       DMA_BIDIRECTIONAL);
 
 	for_each_sg(table->sgl, sg, table->nents, i) {
 		gen_pool_free(chunk_heap->pool, page_to_phys(sg_page(sg)),
 			      sg->length);
 	}
-	chunk_heap->allocated -= allocated_size;
+	atomic_long_sub(allocated_size, &chunk_heap->allocated);
 	sg_free_table(table);
 	kfree(table);
 }
@@ -144,11 +146,12 @@ struct ion_heap *ion_chunk_heap_create(struct ion_platform_heap *heap_data)
 	int ret;
 	struct page *page;
 	size_t size;
+	struct device *dev = heap_data->priv;
 
 	page = pfn_to_page(PFN_DOWN(heap_data->base));
 	size = heap_data->size;
 
-	ion_pages_sync_for_device(NULL, page, size, DMA_BIDIRECTIONAL);
+	ion_pages_sync_for_device(dev, page, size, DMA_BIDIRECTIONAL);
 
 	ret = ion_heap_pages_zero(page, size, pgprot_writecombine(PAGE_KERNEL));
 	if (ret)
@@ -167,7 +170,6 @@ struct ion_heap *ion_chunk_heap_create(struct ion_platform_heap *heap_data)
 	}
 	chunk_heap->base = heap_data->base;
 	chunk_heap->size = heap_data->size;
-	chunk_heap->allocated = 0;
 
 	gen_pool_add(chunk_heap->pool, chunk_heap->base, heap_data->size, -1);
 	chunk_heap->heap.ops = &chunk_heap_ops;
