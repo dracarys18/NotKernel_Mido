@@ -60,7 +60,6 @@
 #include <linux/atomic.h>
 #include <linux/binfmts.h>
 #include <linux/cpu_boost.h>
-#include <linux/devfreq_boost.h>
 
 
 /*
@@ -2434,7 +2433,6 @@ retry_find_task:
 		!memcmp(of->kn->parent->name, "top-app", sizeof("top-app")) &&
 		is_zygote_pid(tsk->parent->pid)) {
 		do_input_boost_max();
-		devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 100);
 	}
 
 
