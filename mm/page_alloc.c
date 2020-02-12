@@ -60,6 +60,9 @@
 #include <linux/page-debug-flags.h>
 #include <linux/hugetlb.h>
 #include <linux/sched/rt.h>
+#include <linux/random.h>
+#include <linux/cpu_boost.h>
+#include <linux/devfreq_boost.h>
 
 #include <asm/sections.h>
 #include <asm/tlbflush.h>
@@ -2938,6 +2941,11 @@ rebalance:
 				 */
 				if (order > PAGE_ALLOC_COSTLY_ORDER)
 					goto nopage;
+
+				/* Boost when memory is low so allocation latency doesn't get too bad */
+				do_input_boost_max();
+				devfreq_boost_kick_max(DEVFREQ_MSM_CPUBW, 100);
+
 				/*
 				 * The oom killer is not called for lowmem
 				 * allocations to prevent needlessly killing
