@@ -1,0 +1,6 @@
+- Rebased to Android Q CAF tags and Prima
+- Nuke event based Sultanxda's cpu boost driver and switch back to regular one
+- Up to date with android/common source till 7 february
+- Bug Fixes and Improvements
+- Added Franco Kernel manager OTA support Download config and add to fkm
+- Config:- https://raw.githubusercontent.com/dracarys18/NotKernel/10-stable/fk.json
