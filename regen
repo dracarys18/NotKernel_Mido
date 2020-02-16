@@ -1,4 +1,4 @@
 export ARCH=arm64
 make mido_defconfig
 cp $PWD/.config arch/arm64/configs/mido_defconfig
-git commit -am "mido: defconfig: regenerate"
+git commit -a --signoff
