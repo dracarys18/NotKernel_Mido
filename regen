@@ -1,4 +1,14 @@
 export ARCH=arm64
 make mido_defconfig
 cp $PWD/.config arch/arm64/configs/mido_defconfig
+echo "Manual commit message? y/n"
+read op
+if [ $op == "y" ]
+then
 git commit -a --signoff
+elif [ $op == "n" ]
+then
+git commit -am "mido:defconfig regen" --signoff
+else
+echo "Wrong input"
+fi
