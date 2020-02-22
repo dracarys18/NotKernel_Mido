@@ -1,11 +1,11 @@
 {
   "kernel": {
     "name": "NotKernel",
-    "version": "ROGUE",
-    "link": "https://github.com/dracarys18/NotKernel/releases/download/ROGUE/NotKernel-Mido-2020-02-13-55.zip",
+    "version": "PARADISE",
+    "link": "https://github.com/dracarys18/NotKernel/releases/download/PARADISE/NotKernel-Mido-2020-02-22-56.zip",
     "changelog_url": "https://raw.githubusercontent.com/dracarys18/NotKernel/10-stable/changelog",
-    "date": "2020-02-13",
-    "sha1": "3cc6602bfe7063d8a755ecbce332b8e7ba68f871"
+    "date": "2020-02-23",
+    "sha1": "32e110746ce8f993917f1c77beb810b75d597b58"
   },
   "support": {
     "link": "https://t.me/notkernel"
