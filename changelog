@@ -1,6 +1,7 @@
-- Rebased to Android Q CAF tags and Prima
-- Nuke event based Sultanxda's cpu boost driver and switch back to regular one
-- Up to date with android/common source till 7 february
-- Bug Fixes and Improvements
-- Added Franco Kernel manager OTA support Download config and add to fkm
-- Config:- https://raw.githubusercontent.com/dracarys18/NotKernel/10-stable/fk.json
+- Updated Kernel to latest android-common
+- Updated devfreq boost driver
+- Enabled support for Ultra Low Power State (ULPS) mode.
+- Disable ESD check on display panels
+- CFS:Reduce latency for better responsiveness 
+- Improved CFS
+- Optimise dynamic cache allocation in many cases
