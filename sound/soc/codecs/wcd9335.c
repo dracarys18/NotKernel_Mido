@@ -13986,9 +13986,6 @@ static int tasha_codec_probe(struct snd_soc_codec *codec)
 	mutex_unlock(&codec->mutex);
 	snd_soc_dapm_sync(dapm);
 
-	if (pdata->wcd9xxx_mic_tristate)
-		tasha_set_high_impedance_mode(codec);
-
 	/* ASUS_BSP Paul +++ */
         if (!g_audiowizard_force_preset_sdev) {
 		g_audiowizard_force_preset_sdev = kzalloc(sizeof(struct switch_dev), GFP_KERNEL);
