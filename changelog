@@ -1,7 +1,12 @@
-- Updated Kernel to latest android-common
-- Updated devfreq boost driver
-- Enabled support for Ultra Low Power State (ULPS) mode.
-- Disable ESD check on display panels
-- CFS:Reduce latency for better responsiveness 
-- Improved CFS
-- Optimise dynamic cache allocation in many cases
+- Updated Kernel to latest android-common and CAF Tag
+- Updated Wlan driver from latest CAF tag
+- treewide: remove _no_log() usage 
+- Align file struct to 8 bytes (This improves hackbench results by about 5% on average.)
+
+FK OTA: https://raw.githubusercontent.com/dracarys18/NotKernel/10-stable/fk.json
+Bug reports and support: @notkernel
+
+As some of you already know I broke my mido and I have been wearing raphael now. So as I dont have the device this will be 
+the last PUBLIC RELEASE for mido. You can always flash CI builds from my group and if you are a developer my sources are open
+
+Thank you for the support all these years :)
