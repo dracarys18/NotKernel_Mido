@@ -289,12 +289,6 @@ wait_sdrc_ready:
 	bic	r5, r5, #0x40
 	str	r5, [r4]
 
-/*
- * PC-relative stores lead to undefined behaviour in Thumb-2: use a r7 as a
- * base instead.
- * Be careful not to clobber r7 when maintaing this code.
- */
-
 is_dll_in_lock_mode:
 	/* Is dll in lock mode? */
 	ldr	r4, sdrc_dlla_ctrl
@@ -302,11 +296,7 @@ is_dll_in_lock_mode:
 	tst	r5, #0x4
 	bne	exit_nonoff_modes	@ Return if locked
 	/* wait till dll locks */
-	adr	r7, kick_counter
 wait_dll_lock_timed:
-	ldr	r4, wait_dll_lock_counter
-	add	r4, r4, #1
-	str	r4, [r7, #wait_dll_lock_counter - kick_counter]
 	ldr	r4, sdrc_dlla_status
 	/* Wait 20uS for lock */
 	mov	r6, #8
@@ -330,9 +320,6 @@ kick_dll:
 	orr	r6, r6, #(1<<3)		@ enable dll
 	str	r6, [r4]
 	dsb
-	ldr	r4, kick_counter
-	add	r4, r4, #1
-	str	r4, [r7]		@ kick_counter
 	b	wait_dll_lock_timed
 
 exit_nonoff_modes:
@@ -360,15 +347,6 @@ sdrc_dlla_status:
 	.word	SDRC_DLLA_STATUS_V
 sdrc_dlla_ctrl:
 	.word	SDRC_DLLA_CTRL_V
-	/*
-	 * When exporting to userspace while the counters are in SRAM,
-	 * these 2 words need to be at the end to facilitate retrival!
-	 */
-kick_counter:
-	.word	0
-wait_dll_lock_counter:
-	.word	0
-
 ENTRY(omap3_do_wfi_sz)
 	.word	. - omap3_do_wfi
 
@@ -449,12 +427,14 @@ skipl2dis:
 	and	r1, #0x700
 	cmp	r1, #0x300
 	beq	l2_inv_gp
+	adr	r0, l2_inv_api_params_offset
+	ldr	r3, [r0]
+	add	r3, r3, r0		@ r3 points to dummy parameters
 	mov	r0, #40			@ set service ID for PPA
 	mov	r12, r0			@ copy secure Service ID in r12
 	mov	r1, #0			@ set task id for ROM code in r1
 	mov	r2, #4			@ set some flags in r2, r6
 	mov	r6, #0xff
-	adr	r3, l2_inv_api_params	@ r3 points to dummy parameters
 	dsb				@ data write barrier
 	dmb				@ data memory barrier
 	smc	#1			@ call SMI monitor (smi #1)
@@ -488,8 +468,8 @@ skipl2dis:
 	b	logic_l1_restore
 
 	.align
-l2_inv_api_params:
-	.word	0x1, 0x00
+l2_inv_api_params_offset:
+	.long	l2_inv_api_params - .
 l2_inv_gp:
 	/* Execute smi to invalidate L2 cache */
 	mov r12, #0x1			@ set up to invalidate L2
@@ -537,6 +517,10 @@ control_mem_rta:
 	.word	CONTROL_MEM_RTA_CTRL
 l2dis_3630:
 	.word	0
+
+	.data
+l2_inv_api_params:
+	.word	0x1, 0x00
 
 /*
  * Internal functions
