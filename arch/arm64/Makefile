@@ -48,6 +48,9 @@ endif
 
 KBUILD_CFLAGS	+= $(vdso32)
 KBUILD_CFLAGS	+= -mgeneral-regs-only
+ifeq ($(CONFIG_ARCH_MSM8953), y)
+KBUILD_CFLAGS	+= -mcpu=cortex-a53
+endif
 KBUILD_CFLAGS	+= -fno-pic
 KBUILD_CFLAGS	+= $(call cc-option, -mpc-relative-literal-loads)
 KBUILD_AFLAGS	+= $(vdso32)
