@@ -613,15 +613,9 @@ void msm_mpm_exit_sleep(bool from_idle)
 			if (desc)
 				chip = desc->irq_data.chip;
 
-			if (desc && !irqd_is_level_type(&desc->irq_data) &&
-				(!(chip && !strcmp(chip->name, "msmgpio")))) {
-				irq_set_pending(apps_irq);
-				if (from_idle) {
-					raw_spin_lock(&desc->lock);
-					check_irq_resend(desc, apps_irq);
-					raw_spin_unlock(&desc->lock);
-				}
-			}
+			if (desc && !irqd_is_level_type(&desc->irq_data))
+				irq_set_irqchip_state(apps_irq,
+						IRQCHIP_STATE_PENDING, true);
 
 			k = find_next_bit(&pending, 32, k + 1);
 		}
