@@ -492,8 +492,6 @@ extern int irq_chip_set_vcpu_affinity_parent(struct irq_data *data,
 /* Handling of unhandled and spurious interrupts: */
 extern void note_interrupt(struct irq_desc *desc, irqreturn_t action_ret);
 
-/* Resending of interrupts :*/
-void check_irq_resend(struct irq_desc *desc, unsigned int irq);
 
 /* Enable/disable irq debugging output: */
 extern int noirqdebug_setup(char *str);
