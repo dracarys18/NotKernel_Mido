@@ -287,6 +287,7 @@
 #       define EVERGREEN_DP_VID_STREAM_STATUS          (1 <<16)
 #define EVERGREEN_DP_STEER_FIFO                         0x7310
 #       define EVERGREEN_DP_STEER_FIFO_RESET           (1 << 0)
+
 #define EVERGREEN_DP_SEC_CNTL                           0x7280
 #       define EVERGREEN_DP_SEC_STREAM_ENABLE           (1 << 0)
 #       define EVERGREEN_DP_SEC_ASP_ENABLE              (1 << 4)

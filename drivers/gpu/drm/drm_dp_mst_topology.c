@@ -1675,6 +1675,10 @@ static int drm_dp_payload_send_msg(struct drm_dp_mst_topology_mgr *mgr,
 	port = drm_dp_get_validated_port_ref(mgr, port);
 	if (!port)
 		return -EINVAL;
+	if (!mstb) {
+		drm_dp_put_port(port);
+		return -EINVAL;
+	}
 
 	port_num = port->port_num;
 	mstb = drm_dp_get_validated_mstb_ref(mgr, port->parent);
