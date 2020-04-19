@@ -59,7 +59,7 @@
 #include <linux/delay.h>
 #include <linux/atomic.h>
 #include <linux/binfmts.h>
-#include <linux/cpu_boost.h>
+#include <linux/cpu_input_boost.h>
 
 
 /*
@@ -2432,7 +2432,7 @@ retry_find_task:
 	if (!ret && !threadgroup &&
 		!memcmp(of->kn->parent->name, "top-app", sizeof("top-app")) &&
 		is_zygote_pid(tsk->parent->pid)) {
-		do_input_boost_max();
+		cpu_input_boost_kick();
 	}
 
 
