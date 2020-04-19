@@ -40,14 +40,16 @@ static struct boost_drv boost_drv_g __read_mostly = {
 
 static unsigned int get_input_boost_freq(struct cpufreq_policy *policy)
 {
-
-	return min(CONFIG_INPUT_BOOST_FREQ, policy->max);
+        unsigned int freq;
+        freq = CONFIG_INPUT_BOOST_FREQ;
+	return min(freq, policy->max);
 }
 
 static unsigned int get_max_boost_freq(struct cpufreq_policy *policy)
 {
-
-	return min(CONFIG_MAX_BOOST_FREQ, policy->max);
+	unsigned int freq;
+	freq = CONFIG_MAX_BOOST_FREQ;
+	return min(freq, policy->max);
 }
 
 static void update_online_cpu_policy(void)
