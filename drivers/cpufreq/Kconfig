@@ -263,13 +263,13 @@ config WAKE_BOOST_DURATION_MS
 
 config INPUT_BOOST_FREQ
 	int "input boost freq"
-	default "0"
+	default "1804800"
 	help
 	  Input boost frequency for the CPU .
 
 config MAX_BOOST_FREQ
 	int "max-boost freq"
-	default "0"
+	default "2016000"
 	help
 	  Max-boost frequency for the  CPU ..
 
