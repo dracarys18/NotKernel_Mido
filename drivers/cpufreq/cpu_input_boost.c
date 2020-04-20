@@ -40,38 +40,25 @@ static struct boost_drv boost_drv_g __read_mostly = {
 
 static unsigned int get_input_boost_freq(struct cpufreq_policy *policy)
 {
-	unsigned int freq;
 
-	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
-		freq = CONFIG_INPUT_BOOST_FREQ_LP;
-	else
-		freq = CONFIG_INPUT_BOOST_FREQ_PERF;
-
-	return min(freq, policy->max);
+	return min(CONFIG_INPUT_BOOST_FREQ, policy->max);
 }
 
 static unsigned int get_max_boost_freq(struct cpufreq_policy *policy)
 {
-	unsigned int freq;
 
-	if (cpumask_test_cpu(policy->cpu, cpu_lp_mask))
-		freq = CONFIG_MAX_BOOST_FREQ_LP;
-	else
-		freq = CONFIG_MAX_BOOST_FREQ_PERF;
-
-	return min(freq, policy->max);
+	return min(CONFIG_MAX_BOOST_FREQ, policy->max);
 }
 
 static void update_online_cpu_policy(void)
 {
+
 	unsigned int cpu;
 
-	/* Only one CPU from each cluster needs to be updated */
+	/* Trigger cpufreq notifier for online CPUs */
 	get_online_cpus();
-	cpu = cpumask_first_and(cpu_lp_mask, cpu_online_mask);
-	cpufreq_update_policy(cpu);
-	cpu = cpumask_first_and(cpu_perf_mask, cpu_online_mask);
-	cpufreq_update_policy(cpu);
+	for_each_online_cpu(cpu)
+		cpufreq_update_policy(cpu);
 	put_online_cpus();
 }
 

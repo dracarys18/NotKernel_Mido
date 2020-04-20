@@ -261,29 +261,17 @@ config WAKE_BOOST_DURATION_MS
 	help
 	  Wake boost duration in milliseconds.
 
-config INPUT_BOOST_FREQ_LP
-	int "Low-power cluster boost freq"
+config INPUT_BOOST_FREQ
+	int "input boost freq"
 	default "0"
 	help
-	  Input boost frequency for the low-power CPU cluster.
+	  Input boost frequency for the CPU .
 
-config INPUT_BOOST_FREQ_PERF
-	int "Performance cluster boost freq"
+config MAX_BOOST_FREQ
+	int "max-boost freq"
 	default "0"
 	help
-	  Input boost frequency for the performance CPU cluster.
-
-config MAX_BOOST_FREQ_LP
-	int "Low-power cluster max-boost freq"
-	default "0"
-	help
-	  Max-boost frequency for the low-power CPU cluster.
-
-config MAX_BOOST_FREQ_PERF
-	int "Performance cluster max-boost freq"
-	default "0"
-	help
-	  Max-boost frequency for the performance CPU cluster.
+	  Max-boost frequency for the  CPU ..
 
 endif
 
