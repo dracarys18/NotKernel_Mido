@@ -76,7 +76,7 @@
 #include <linux/aio.h>
 #include <linux/compiler.h>
 #include <linux/cpufreq.h>
-#include <linux/cpu_input_boost.h>
+#include <linux/cpu_boost.h>
 #include <linux/devfreq_boost.h>
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
@@ -1695,7 +1695,7 @@ long do_fork(unsigned long clone_flags,
 	long nr;
 
         if (is_zygote_pid(current->pid)) {
-		cpu_input_boost_kick();
+		do_input_boost_max();
 	}
 
 
