@@ -1520,7 +1520,7 @@ int drm_mode_atomic_ioctl(struct drm_device *dev,
 		return -EINVAL;
 
 	if (!(arg->flags & DRM_MODE_ATOMIC_TEST_ONLY)) {
-		do_input_boost_max();
+		do_input_boost_max(1200);
 		devfreq_boost_kick(DEVFREQ_MSM_CPUBW);
 	}
 

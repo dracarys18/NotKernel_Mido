@@ -14,9 +14,9 @@
 #define _CPU_BOOST_H_
 
 #ifdef CONFIG_CPU_BOOST
-void do_input_boost_max(void);
+void do_input_boost_max(unsigned int boost_duration_ms);
 #else
-static inline void do_input_boost_max(void)
+static inline void do_input_boost_max(unsigned int boost_duration_ms)
 {
 }
 #endif

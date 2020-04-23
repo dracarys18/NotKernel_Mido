@@ -2432,7 +2432,7 @@ retry_find_task:
 	if (!ret && !threadgroup &&
 		!memcmp(of->kn->parent->name, "top-app", sizeof("top-app")) &&
 		is_zygote_pid(tsk->parent->pid)) {
-		do_input_boost_max();
+		do_input_boost_max(1200);
 	}
 
 
