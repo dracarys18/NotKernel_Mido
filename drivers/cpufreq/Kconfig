@@ -58,6 +58,7 @@ config CPU_FREQ_STAT_DETAILS
 choice
 	prompt "Default CPUFreq governor"
 	default CPU_FREQ_DEFAULT_GOV_USERSPACE if ARM_SA1100_CPUFREQ || ARM_SA1110_CPUFREQ
+	default CONFIG_CPU_FREQ_DEFAULT_GOV_CONSERVATIVE if !SCHED_HMP
 	default CPU_FREQ_DEFAULT_GOV_PERFORMANCE
 	help
 	  This option sets which CPUFreq governor shall be loaded at
