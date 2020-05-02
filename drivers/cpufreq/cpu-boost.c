@@ -24,6 +24,7 @@
 #include <linux/input.h>
 #include <linux/time.h>
 #include <linux/cpu_boost.h>
+#include <linux/display_state.h>
 
 struct cpu_sync {
 	int cpu;
@@ -213,6 +214,9 @@ void do_input_boost_max(unsigned int boost_duration_ms)
 	unsigned int i;
 	struct cpu_sync *i_sync_info;
 
+	if(!is_display_on())
+	     return;
+
 	if (!cpu_boost_worker_thread)
 		return;
 
@@ -233,6 +237,9 @@ static void do_input_boost(struct kthread_work *work)
 {
 	unsigned int i, ret;
 	struct cpu_sync *i_sync_info;
+
+	if(!is_display_on())
+	     return;
 
 	if (!input_boost_ms)
 		return;
@@ -272,6 +279,9 @@ static void cpuboost_input_event(struct input_handle *handle,
 	u64 now;
 
 	if (!input_boost_enabled)
+		return;
+
+	if(!is_display_on())
 		return;
 
 	now = ktime_to_us(ktime_get());
