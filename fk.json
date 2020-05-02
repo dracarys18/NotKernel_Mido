@@ -1,11 +1,11 @@
 {
   "kernel": {
     "name": "NotKernel",
-    "version": "EOL",
-    "link": "https://github.com/dracarys18/NotKernel/releases/download/EOL/NotKernel-Mido-2020-03-12-02.zip",
+    "version": "QUARANTINE",
+    "link": "https://github.com/dracarys18/NotKernel/releases/download/QUARANTINE/NotKernel-Mido-2020-05-02-32.zip",
     "changelog_url": "https://raw.githubusercontent.com/dracarys18/NotKernel/10-stable/changelog",
-    "date": "2020-03-12",
-    "sha1": "496a0aa8adfe00511769319eeef28f979e21f0fe"
+    "date": "2020-05-02",
+    "sha1": "d3fc8bac197693b7dd07d20f6292259758818f5a"
   },
   "support": {
     "link": "https://t.me/notkernel"

@@ -1,12 +1,11 @@
-- Updated Kernel to latest android-common and CAF Tag
-- Updated Wlan driver from latest CAF tag
-- treewide: remove _no_log() usage 
-- Align file struct to 8 bytes (This improves hackbench results by about 5% on average.)
+- Use -O3 level optimisations
+- cpu-boost: Dont boost cpu when screen in off
+- vmpressure optimisations (Better RAM management)
+- arm64: Tune GCC for msm8953's CPU 
+- gpu: Play with throttling a bit 
+- Up to date with CAF tag LA.UM.8.6.r1-04300-89xx.0
+- random: Switch to FRandom
 
 FK OTA: https://raw.githubusercontent.com/dracarys18/NotKernel/10-stable/fk.json
 Bug reports and support: @notkernel
 
-As some of you already know I broke my mido and I have been wearing raphael now. So as I dont have the device this will be 
-the last PUBLIC RELEASE for mido. You can always flash CI builds from my group and if you are a developer my sources are open
-
-Thank you for the support all these years :)
