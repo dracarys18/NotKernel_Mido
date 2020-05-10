@@ -209,6 +209,30 @@ static void do_input_boost_rem(struct work_struct *work)
 	}
 }
 
+void do_input_boost_freq(unsigned int freq , unsigned int in_boost_duration_ms)
+{
+        unsigned int i;
+        struct cpu_sync *i_sync_info;
+	
+        if(!is_display_on())
+             return;
+
+        if (!cpu_boost_worker_thread)
+                return;
+
+        cancel_delayed_work_sync(&input_boost_rem);
+
+        for_each_possible_cpu(i) {
+                i_sync_info = &per_cpu(sync_info, i);
+                i_sync_info->input_boost_min = freq;
+        }
+
+        update_policy_online();
+
+        queue_delayed_work(system_power_efficient_wq,
+                &input_boost_rem, msecs_to_jiffies(in_boost_duration_ms));
+}
+
 void do_input_boost_max(unsigned int boost_duration_ms)
 {
 	unsigned int i;

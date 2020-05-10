@@ -15,8 +15,12 @@
 
 #ifdef CONFIG_CPU_BOOST
 void do_input_boost_max(unsigned int boost_duration_ms);
+void do_input_boost_freq(unsigned int freq ,unsigned int in_boost_duration_ms);
 #else
 static inline void do_input_boost_max(unsigned int boost_duration_ms)
+{
+}
+static inline void do_input_boost_freq(unsigned int freq , unsigned int in_boost_duration_ms)
 {
 }
 #endif
