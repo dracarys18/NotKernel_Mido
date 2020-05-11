@@ -572,8 +572,14 @@ struct mdss_dsi_ctrl_pdata {
 	wait_queue_head_t wake_waitq;
 	atomic_t disp_is_on;
 	atomic_t needs_wake;
-
 	struct pm_qos_request pm_qos_req;
+	atomic_t disp_en;
+};
+
+enum {
+	MDSS_DISPLAY_OFF,
+	MDSS_DISPLAY_WAKING,
+	MDSS_DISPLAY_ON
 };
 
 struct dsi_status_data {
