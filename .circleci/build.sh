@@ -2,18 +2,18 @@
 echo "Cloning dependencies"
 git clone --depth=1 https://github.com/dracarys18/NotKernel kernel
 cd kernel
-git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 -b android-9.0.0_r39 toolchain
-git clone --depth=1 https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 -b android-9.0.0_r39 toolchain32
+git clone --depth=1 https://github.com/arter97/arm64-gcc.git toolchain
+git clone --depth=1 https://github.com/arter97/arm32-gcc.git toolchain32
 git clone --depth=1 https://github.com/dracarys18/AnyKernel3.git Anykernel
 echo "Done"
-GCC="$(pwd)/aarch64-linux-android-"
+GCC="$(pwd)/toolchain/bin/aarch64-elf-"
 IMAGE=$(pwd)/out/arch/arm64/boot/Image.gz-dtb
 TANGGAL=$(date +"%F-%S")
 START=$(date +"%s")
 export CONFIG_PATH=$PWD/arch/arm64/configs/mido_defconfig
 PATH="${PWD}/toolchain/bin:${PWD}/toolchain32/bin:${PATH}"
-export CROSS_COMPILE_ARM32="$(pwd)/toolchain32/bin/arm-linux-androideabi-"
-export CROSS_COMPILE="aarch64-linux-android-"
+export CROSS_COMPILE_ARM32="$(pwd)/toolchain32/bin/arm-eabi-"
+export CROSS_COMPILE="aarch64-elf-"
 export ARCH=arm64
 export KBUILD_BUILD_HOST=NotKernel
 export KBUILD_BUILD_USER="root"
