@@ -24,6 +24,7 @@
 #include <linux/fastchg.h>
 #include <linux/string.h>
 
+#ifdef CONFIG_USB_FAST_CHARGE
 int force_fast_charge = 0;
 
 static int __init get_fastcharge_opt(char *ffc)
@@ -95,6 +96,7 @@ void force_fast_charge_exit(void)
 {
 	kobject_put(force_fast_charge_kobj);
 }
+#endif
 
 module_init(force_fast_charge_init);
 module_exit(force_fast_charge_exit);
