@@ -202,6 +202,7 @@ static int fb_notifier_cb(struct notifier_block *nb, unsigned long action,
 	return NOTIFY_OK;
 }
 
+#if 0
 static void devfreq_boost_input_event(struct input_handle *handle,
 				      unsigned int type, unsigned int code,
 				      int value)
@@ -212,6 +213,7 @@ static void devfreq_boost_input_event(struct input_handle *handle,
 	for (i = 0; i < DEVFREQ_MAX; i++)
 		__devfreq_boost_kick(d->devices + i);
 }
+#endif
 
 static int devfreq_boost_input_connect(struct input_handler *handler,
 				       struct input_dev *dev,
@@ -279,7 +281,6 @@ static const struct input_device_id devfreq_boost_ids[] = {
 };
 
 static struct input_handler devfreq_boost_input_handler = {
-	.event		= devfreq_boost_input_event,
 	.connect	= devfreq_boost_input_connect,
 	.disconnect	= devfreq_boost_input_disconnect,
 	.name		= "devfreq_boost_handler",
