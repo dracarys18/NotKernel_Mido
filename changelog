@@ -1,10 +1,12 @@
-- Use -O3 level optimisations
-- cpu-boost: Dont boost cpu when screen in off
-- vmpressure optimisations (Better RAM management)
-- arm64: Tune GCC for msm8953's CPU 
-- gpu: Play with throttling a bit 
-- Up to date with CAF tag LA.UM.8.6.r1-04300-89xx.0
-- random: Switch to FRandom
+- Wake up display asynchronously
+- Mark fingerprint IRQ's as perf critical
+- Added Wireguard VPN support
+- Mark display process IRQ's as perf critical
+- Boost devfreq for 150ms on touch events
+- Enable ULPS mode on suspend
+- Blocked all init scripts and other userspace from changing the governor so the
+  default governor will be conservative as defined in the kernel unless you are
+  using a kernel manager to set it
 
 FK OTA: https://raw.githubusercontent.com/dracarys18/NotKernel/10-stable/fk.json
 Bug reports and support: @notkernel
