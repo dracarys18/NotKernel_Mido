@@ -12,3 +12,4 @@ git commit -am "mido:defconfig regen" --signoff
 else
 echo "Wrong input"
 fi
+make mrproper
