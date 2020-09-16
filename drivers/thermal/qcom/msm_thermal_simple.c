@@ -82,6 +82,7 @@ static void thermal_throttle_worker(struct work_struct *work)
 
 	/* Update thermal zone if it changed */
 	if (new_zone != old_zone) {
+		pr_info("cpu_temp= %lld \n",temp_deg);
 		t->curr_zone = new_zone;
 		update_online_cpu_policy();
 	}
