@@ -22,8 +22,7 @@
 })
 
 struct thermal_zone {
-	u32 gold_khz;
-	u32 silver_khz;
+	u32 cpu_khz;
 	s32 trip_deg;
 };
 
@@ -42,14 +41,16 @@ struct thermal_drv {
 
 static void update_online_cpu_policy(void)
 {
-	u32 cpu;
+	unsigned int cpu;
 
 	/* Only one CPU from each cluster needs to be updated */
 	get_online_cpus();
-	cpu = cpumask_first_and(cpu_lp_mask, cpu_online_mask);
-	cpufreq_update_policy(cpu);
-	cpu = cpumask_first_and(cpu_perf_mask, cpu_online_mask);
-	cpufreq_update_policy(cpu);
+	for_each_possible_cpu(cpu){
+	 if(cpu_online(cpu))
+	    {
+		cpufreq_update_policy(cpu);
+	    }
+	}
 	put_online_cpus();
 }
 
@@ -91,10 +92,8 @@ reschedule:
 
 static u32 get_throttle_freq(struct thermal_zone *zone, u32 cpu)
 {
-	if (cpumask_test_cpu(cpu, cpu_lp_mask))
-		return zone->silver_khz;
 
-	return zone->gold_khz;
+	return zone->cpu_khz;
 }
 
 static int cpu_notifier_cb(struct notifier_block *nb, unsigned long val,
@@ -170,11 +169,7 @@ static int msm_thermal_simple_parse_dt(struct platform_device *pdev,
 
 		zone = t->zones + reg;
 
-		ret = OF_READ_U32(child, "qcom,silver-khz", zone->silver_khz);
-		if (ret)
-			goto free_zones;
-
-		ret = OF_READ_U32(child, "qcom,gold-khz", zone->gold_khz);
+		ret = OF_READ_U32(child, "qcom,cpu-khz", zone->cpu_khz);
 		if (ret)
 			goto free_zones;
 
