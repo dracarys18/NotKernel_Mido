@@ -827,6 +827,7 @@ static struct platform_driver gf_driver = {
 
 #endif
 		   .of_match_table = gx_match_table,
+		   .probe_type = PROBE_PREFER_ASYNCHRONOUS,
 		   },
 	.probe = gf_probe,
 	.remove = gf_remove,

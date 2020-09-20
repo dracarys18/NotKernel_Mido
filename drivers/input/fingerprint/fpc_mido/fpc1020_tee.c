@@ -634,6 +634,7 @@ static struct platform_driver fpc1020_driver = {
 #ifdef LINUX_CONTROL_SPI_CLK
 		.pm = &fpc1020_pm_ops,
 #endif
+		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
 	},
 	.probe		= fpc1020_probe,
 	.remove		= fpc1020_remove,
