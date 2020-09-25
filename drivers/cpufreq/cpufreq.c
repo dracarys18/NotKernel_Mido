@@ -25,6 +25,7 @@
 #include <linux/init.h>
 #include <linux/kernel_stat.h>
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
 #include <linux/suspend.h>
@@ -36,6 +37,9 @@
 #include <trace/events/power.h>
 
 static LIST_HEAD(cpufreq_policy_list);
+
+static bool disable_userspace_boost = true;
+module_param(disable_userspace_boost, bool, 0644);
 
 static inline bool policy_is_inactive(struct cpufreq_policy *policy)
 {
@@ -772,7 +776,8 @@ static ssize_t store_##file_name					\
 	int ret, temp;							\
 	struct cpufreq_policy new_policy;				\
 									\
-	if (&policy->object == &policy->min)				\
+	if (&policy->object == &policy->min                             \
+	    || disable_userspace_boost )				\
 		return count;						\
 	if (&policy->object == &policy->max)				\
 		return count;						\
